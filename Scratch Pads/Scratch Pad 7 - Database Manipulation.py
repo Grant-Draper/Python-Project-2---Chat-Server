@@ -6,6 +6,12 @@ class Database:
     """Class called "Database", this contains a list of functions that can be
         executed to manipulate of retrieve data from the database"""
 
+    sql_commands = [
+        " SELECT ", " FROM ", " WHERE ", " AND ", " OR ",
+        " INSERT INTO ", " VALUES ", " UPDATE ", " SET ",
+        " DELETE ", " TOP "
+    ]
+
     connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
                                   "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
     cursor = connection.cursor()
@@ -22,6 +28,17 @@ class Database:
 
 
 
+    def fetch_data(self, sqlcode):
+
+        """Function called "fetch_data" to take the single argument "sqlcode" from
+            another function and "fetchall" matching the query from the database."""
+
+        Database.cursor.execute(sqlcode)
+
+        return Database.cursor.fetchall()
+
+
+
     def disconnect(self):
 
         """Function called "disconnect" which closes the database connection gracefully."""
@@ -35,17 +52,26 @@ class Database:
 
         """Function called "add_line_to_table" which takes the arguments "table", columns"
             and "values" and constructs the variable "sqlcode". This variable is then
-            passed to the "execute_sqlcode" function."""
+            passed to the "execute_sqlcode" function.
 
-        action = "INSERT INTO "
+            table - Where you want to affect data (The Entity/Table Name)
+            columns - The columns you want to affect within the location
+            values - The information you want to insert into the database
 
-        # self.database_table = table
-        # self.database_columns = columns
-        # self.database_values = values
+            ***IMPORTANT: All "Values" must use single quotes within the python string
+            composer, this indicates to SQL that the values are strings!!
+            e.g. "'Logged Out', 'User has been logged out'" """
 
-        sqlcode = action + table + " ({0})".format(*columns) + " VALUES ({0})".format(*values)
+        action = Database.sql_commands[5]
 
-        Database.execute_sqlcode(self, sqlcode)
+        if type(columns) != list:
+
+            sqlcode = action + table + " ({0})".format(columns) + " VALUES ({0})".format(values)
+            Database.execute_sqlcode(self, sqlcode)
+        else:
+            sqlcode = action + table + " ({0})".format(*columns) + " VALUES ({0})".format(*values)
+            Database.execute_sqlcode(self, sqlcode)
+
 
 
 
@@ -61,14 +87,21 @@ class Database:
 
     def select_from_table(self, columns, table):
 
-        """"""
+        """Function called "select_from_table", takes the arguments "columns" and
+            "table" and constructs the variable "sqlcode". This variable is then
+            passed to the "execute_sqlcode" function.
 
-        action = ["SELECT ", "FROM "]
+            table - Where you want to select data (The Entity/Table Name)
+            columns - The columns you want to find within the table, or
+                        use * to select ALL columns. """
 
-        sqlcode = action[0] + " {0} ".format(*columns) + action[1] + table
+        if type(columns) != list:
 
-        return Database.execute_sqlcode(self, sqlcode)
-
+            sqlcode = Database.sql_commands[0] + " {0} ".format(columns) + Database.sql_commands[1] + table
+            return Database.fetch_data(self, sqlcode)
+        else:
+            sqlcode = Database.sql_commands[0] + " {0} ".format(*columns) + Database.sql_commands[1] + table
+            return Database.fetch_data(self, sqlcode)
 
 
 
@@ -79,7 +112,10 @@ class Database:
 
 d = Database()
 
+d.add_line_to_table("MessageType", "MessageType", "'LEAVE'")
 # d.add_line_to_table("Actions", ["Action, Description"], ["'Test', 'This is test input 3'"])
 # d.add_line_to_table("Actions", ["Action, Description"], ["'Test', 'This is test input 4'"])
 
 print(d.select_from_table(["Action, Description"], "Actions"))
+print(d.select_from_table("MessageType", "MessageType"))
+print(d.select_from_table("*", "MessageType"))
