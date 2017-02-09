@@ -13,7 +13,7 @@ NORMAL = 0
 
 # 2. connect the socket object to the server's ip address and port
 
-while(True):
+#while(True):
 	# 3. get a message from the user
 
 	# 4. create a message of type NORMAL with the string specified
