@@ -1,5 +1,6 @@
 import socket
 import select
+import sys
 from message import *
 
 # sever address to connect to

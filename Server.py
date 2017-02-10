@@ -7,36 +7,54 @@
                 Modules:
 **********************************************************"""
 
-import socket, ssl, json, select, pprint
+import socket
+import ssl
+import json
+import select
+from MessageClass import *
 from datetime import datetime
-
-"""starting to try and implement sockets"""
-
-
-def FileScan(python_data):
-    while True:
-        while True:
-            print("Filepath:", python_data[7])
-            for s in (python_data[5]):
-                print("Directory has", python_data[4], "files, which consume", s)
-            # print("Total number of files:", python_data[4])
-            print("Contents:")
-            for i in (python_data[3]):
-                print(i)
-            print(" ")
-            print(" ")
-            break
-        print("Directory Scanned:", python_data[2])
-        print("Total Size of Directory:", python_data[6])
-        print("\n", "----------------------------------------------------------------", "\n")
-
-        break
-    return
-
 
 
 Host = ""
 Port = 30000
+client_sockets = []
+
+
+def accept_new_client_connection(master_socket, client_sockets):
+
+    """ accept a connection from a client and append it to the client_sockets list """
+
+    # accept the new connection
+    client_socket, client_address = master_socket.accept()
+
+    # add the new client to our list of clients
+    client_sockets.append(client_socket)
+
+    ssl_socket = ssl.wrap_socket(client_socket, server_side=True, certfile="server.crt", keyfile="server.key")
+    ssl_socket.setblocking(0)
+    client_sockets.append(ssl_socket)
+
+
+    return client_sockets
+
+
+def receive_and_broadcast_message(readable_socket, client_sockets):
+    """ receive message from readable_socket and send it to all sockets in client_sockets """
+
+    (msg_type, msg_text) = Message.receive_msg_from(readable_socket)
+
+    Message.print_message(msg_type, msg_text)
+
+    # if this message is a normal message, send it to all clients.
+    # for now this includes the client that sent it in the first place.
+    if msg_type == NORMAL:
+        for client_socket in client_sockets:
+            Message.send_msg(msg_type, msg_text, client_socket)
+
+
+#
+# Host = ""
+# Port = 30000
 
 
 master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,25 +63,30 @@ master_socket.setblocking(0)
 master_socket.bind((Host, Port))
 master_socket.listen(1)
 
-sockets = []
-sockets.append(master_socket)
+#client_sockets = []
+#client_sockets.append(master_socket)
 
 
-def Listening():
+def listening():
 
     while True:
-        (readable, writable, exceptional) = select.select(sockets, [], sockets)
+        readable_sockets, _, _ = select.select([master_socket], [], [], 1)# + client_sockets, [], [], 1)
 
-        for s in readable:
-            if s is master_socket:
-                (client, _) = master_socket.accept()
-                ssl_socket = ssl.wrap_socket(client, server_side=True, certfile="server.crt", keyfile="server.key")
-                ssl_socket.setblocking(0)
-                sockets.append(ssl_socket)
-                # print("Open Server Connections")
-                # print(sockets)
+        #(readable, writable, exceptional) = select.select(client_sockets, [], client_sockets)
+
+        for readable_socket in readable_sockets:
+
+            if readable_socket is master_socket:
+
+                client_sockets.append(accept_new_client_connection(master_socket, client_sockets))
+
+
 
             else:
+
+                receive_and_broadcast_message(readable_socket, client_sockets)
+
+            """
                 incoming_data = ssl_socket.read()
 
                 if not incoming_data:
@@ -76,122 +99,13 @@ def Listening():
                     outgoing_data = "Server Received Data"
                     ssl_socket.write(outgoing_data.encode("UTF-8"))
 
-                    # if python_data[0] == "TimeStamp":
-                    #     print(python_data[0], "Function Information Received")
-                    #     print("From host: ", python_data[1])
-                    #     print(python_data[2], "\n ")
-
-                    if python_data[0] == "PlatformInfo":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-
-                        items = []
-                        for i in python_data[2]:
-                            items.append(i)
-
-                        #print(items)
-                        print("Device hostname:              ", items[1])
-                        print("Operating system:             ", items[0])
-                        print("Operating system release:     ", items[2])
-                        print("Operating system version:     ", items[3])
-                        print("Machine type:                 ", items[4])
-                        print("Processor type:               ", items[5], "\n ")
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "Partitions":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-
-                        items = []
-                        for i in python_data[2]:
-                            items.append(i)
-                        print(items)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "PartUsage":
-
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-
-                        for key in python_data[2]:
-                            try:
-
-                                value = python_data[2][key]
-
-                                if value[0] == "exception":
-                                    print(key)
-                                    print(value[1], "\n")
-
-                                else:
-                                    print(key)
-                                    print(value[0])
-                                    print(value[1])
-                                    print(value[2], "\n")
-
-                            except Exception as e:
-                                print(e)
-                                pass
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "User":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        print("Currently Active User:", "\n ")
-                        print(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "PSTable":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        print(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "NICs":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        pprint.pprint(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "NICAddr":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        print(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "Sockets":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        print(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-                    elif python_data[0] == "FileScan":
-                        print(python_data[0], "Function Information Received")
-                        ts = datetime.now()
-                        print("From host: ", python_data[1], "at", ts.hour, ":", ts.minute, "on", ts.day, "/", ts.month, "/", ts.year, "\n")
-                        FileScan(python_data)
-                        print("\n", "----------------------------------------------------------------", "\n")
-
-
-                    else:
-                        print("invalid")
+            """
 
 
 
 
 
-
-
-
-
-Listening()
+listening()
 
 
 

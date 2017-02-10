@@ -12,7 +12,7 @@ HEADER_LENGTH = 8
 def send_msg(msg_type, msg_text, sock):
     """This function sends a message to a socket."""
 
-    full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + msg_text[:-1]  # cut off a newline
+    full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + msg_text.strip  # cut off a newline
 
     raw_send(sock, len(full_msg), full_msg)
 

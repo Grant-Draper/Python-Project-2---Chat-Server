@@ -14,19 +14,29 @@ server_socket.listen(1)
 conn, addr = server_socket.accept()
 print("connection from:", addr)
 
-while True:
-    data = conn.recv(1024)
-    if not data:
-        break
-
-    print('Received:', repr(data))
-    conn.sendall(data)
-conn.shutdown(socket.SHUT_RDWR)
-
-conn.close
-server_socket.close()
 
 
+## creating a listening loop for the socket
+
+def listening():
+
+    while True:
+
+        incoming_data = conn.recv(1024)
+
+        if not incoming_data:
+            continue
+            #conn.shutdown(socket.SHUT_RDWR)
+            #conn.close
+            #server_socket.close()
+
+        else:
+            print('Received:', incoming_data)
+            conn.sendall(incoming_data)
+
+
+
+listening()
 
 
 
