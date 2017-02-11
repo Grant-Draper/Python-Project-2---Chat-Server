@@ -1,6 +1,6 @@
 import socket
 import select
-from message import *
+from TestMessage import *
 
 
 def accept_new_client_connection(listening_socket, client_sockets):
@@ -31,7 +31,7 @@ def receive_and_broadcast_message(readable_socket, client_sockets):
 
 
 # our address (we are the server)
-server_ip_address = '127.0.0.1'
+server_ip_address = '192.168.1.201'
 server_port = 5000
 
 # 1. create a socket object
@@ -57,8 +57,10 @@ while True:
         if readable_socket == listening_socket:
             # input has been received on the listening port.
             client_sockets = accept_new_client_connection(listening_socket, client_sockets)
+            pass  # continue
 
         # 12. else the socket is a client, so recieve the message and send it to everyone
         else:
             # input has been received from an existing client
             receive_and_broadcast_message(readable_socket, client_sockets)
+            continue

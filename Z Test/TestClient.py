@@ -1,10 +1,10 @@
 import socket
 import select
 import sys
-from message import *
+from TestMessage import *
 
 # sever address to connect to
-server_ip_address = '127.0.0.1'
+server_ip_address = '192.168.1.201'
 server_port = 5000
 
 # message types
@@ -25,7 +25,12 @@ while True:
     if sys.stdin in available_streams:
         msg_text = sys.stdin.readline()
         send_msg(NORMAL, msg_text, server_socket)
+    continue
 
     # 8. if the server socket is available to read, read from it and print the message
     if server_socket in available_streams:
-        (msg_type, msg_text) = receive_msg_from(server_socket)
+        msg_type, msg_text = receive_msg_from(server_socket)
+        print_message(msg_type, msg_text)
+    continue
+
+
