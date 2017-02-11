@@ -44,7 +44,7 @@ listening_socket.listen(1)
 # 6. create an empty list to store the client sockets that connect
 client_sockets = []
 
-while (True):
+while True:
     # 9. select the sockets which have received input, timing out after 1 second
     readable_sockets, _, _ = select.select([listening_socket] + client_sockets, [], [], 1)
 
