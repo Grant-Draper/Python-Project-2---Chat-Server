@@ -7,6 +7,7 @@
                 Modules:
 **********************************************************"""
 
+import pypyodbc
 import socket
 import ssl
 import json
@@ -15,9 +16,8 @@ from MessageClass import *
 from datetime import datetime
 
 
-Host = ""
+Host = "192.168.1.201"
 Port = 30000
-client_sockets = []
 
 
 def accept_new_client_connection(master_socket, client_sockets):
@@ -28,7 +28,7 @@ def accept_new_client_connection(master_socket, client_sockets):
     client_socket, client_address = master_socket.accept()
 
     # add the new client to our list of clients
-    client_sockets.append(client_socket)
+    #client_sockets.append(client_socket)
 
     ssl_socket = ssl.wrap_socket(client_socket, server_side=True, certfile="server.crt", keyfile="server.key")
     ssl_socket.setblocking(0)
@@ -60,33 +60,38 @@ def receive_and_broadcast_message(readable_socket, client_sockets):
 
 master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-master_socket.setblocking(0)
+#master_socket.setblocking(0)
 master_socket.bind((Host, Port))
 master_socket.listen(1)
 
-client_sockets = []
+#client_sockets = []
 
 #client_sockets.append(master_socket)
 
 
 def listening():
+    client_sockets = []
 
     while True:
         readable_sockets, _, _ = select.select([master_socket] + client_sockets, [], [], 1)# + client_sockets, [], [], 1)
-
+        print("1")
         #(readable, writable, exceptional) = select.select(client_sockets, [], client_sockets)
 
         for readable_socket in readable_sockets:
+            print("2")
+            if readable_socket == master_socket:
 
-            if readable_socket is master_socket:
+                # oringinal
+                client_sockets = accept_new_client_connection(master_socket, client_sockets)
 
-                client_sockets.append(accept_new_client_connection(master_socket, client_sockets))
-                pass
-
+                #client_sockets.append(accept_new_client_connection(master_socket, client_sockets))
+                print("3")
+                continue
 
             else:
 
                 receive_and_broadcast_message(readable_socket, client_sockets)
+                print("4")
                 continue
 
             """

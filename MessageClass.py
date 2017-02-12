@@ -24,20 +24,20 @@ class Message:
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
 
-        raw_send(sock, len(full_msg), full_msg)
+        Message.raw_send(sock, len(full_msg), full_msg)
 
 
     def receive_msg_from(sock):
         """This function waits for a message on a socket and returns the message type and text."""
 
-        header = raw_receive(sock, HEADER_LENGTH)
+        header = Message.raw_receive(sock, HEADER_LENGTH)
         (msg_type, msg_length) = struct.unpack('!LL', header)
 
         try:
             # oringinal
             #msg_text = raw_receive(sock, msg_length)
 
-            msg_text = raw_receive(sock, msg_length).decode("utf-8")
+            msg_text = Message.raw_receive(sock, msg_length).decode("utf-8")
 
             return msg_type, msg_text
 

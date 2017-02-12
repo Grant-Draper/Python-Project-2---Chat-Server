@@ -7,7 +7,7 @@
                 Modules: pypyodbc 1.3.4
 **********************************************************"""
 
-import pypyodbc
+
 import select
 import socket
 import ssl
@@ -37,7 +37,11 @@ def open_client_socket():#outgoing_data):
 
     while True:
         # 6. check if input has been received from stdin or the server_socket
-        available_streams, _, _ = select.select([ssl_socket], [sys.stdin], [], 1)
+        # original
+        #available_streams, _, _ = select.select([ssl_socket], [sys.stdin], [], 1)
+
+        available_streams, _, _ = select.select([sys.stdin, ssl_socket], [], [], 1)
+
 
         # 7. if sys.stdin is available to read, read from it and send the message
         if sys.stdin in available_streams:
@@ -48,7 +52,7 @@ def open_client_socket():#outgoing_data):
         # 8. if the server socket is available to read, read from it and print the message
         if ssl_socket in available_streams:
             msg_type, msg_text = Message.receive_msg_from(ssl_socket)
-            #print(msg_text)
+            print(msg_type, msg_text)
         continue
 
 
