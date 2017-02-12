@@ -19,7 +19,10 @@ class Message:
     def send_msg(msg_type, msg_text, sock):
         """This function sends a message to a socket."""
 
-        full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + msg_text.strip  # cut off a newline
+        # original
+        #full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + msg_text.strip  # cut off a newline
+
+        full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
 
         raw_send(sock, len(full_msg), full_msg)
 
@@ -31,8 +34,12 @@ class Message:
         (msg_type, msg_length) = struct.unpack('!LL', header)
 
         try:
-            msg_text = raw_receive(sock, msg_length)
-            return (msg_type, msg_text)
+            # oringinal
+            #msg_text = raw_receive(sock, msg_length)
+
+            msg_text = raw_receive(sock, msg_length).decode("utf-8")
+
+            return msg_type, msg_text
 
         except MemoryError as err:
             print("MemoryError: " + err.message)

@@ -47,7 +47,8 @@ def receive_and_broadcast_message(readable_socket, client_sockets):
 
     # if this message is a normal message, send it to all clients.
     # for now this includes the client that sent it in the first place.
-    if msg_type == NORMAL:
+    if msg_type == 0:
+    #if msg_type == NORMAL:
         for client_socket in client_sockets:
             Message.send_msg(msg_type, msg_text, client_socket)
 
@@ -63,14 +64,15 @@ master_socket.setblocking(0)
 master_socket.bind((Host, Port))
 master_socket.listen(1)
 
-#client_sockets = []
+client_sockets = []
+
 #client_sockets.append(master_socket)
 
 
 def listening():
 
     while True:
-        readable_sockets, _, _ = select.select([master_socket], [], [], 1)# + client_sockets, [], [], 1)
+        readable_sockets, _, _ = select.select([master_socket] + client_sockets, [], [], 1)# + client_sockets, [], [], 1)
 
         #(readable, writable, exceptional) = select.select(client_sockets, [], client_sockets)
 
@@ -79,12 +81,13 @@ def listening():
             if readable_socket is master_socket:
 
                 client_sockets.append(accept_new_client_connection(master_socket, client_sockets))
-
+                pass
 
 
             else:
 
                 receive_and_broadcast_message(readable_socket, client_sockets)
+                continue
 
             """
                 incoming_data = ssl_socket.read()

@@ -17,7 +17,7 @@ from MessageClass import *
 from datetime import datetime
 
 
-Host = "127.0.0.1"
+Host = "192.168.1.201"
 Port = 30000
 NORMAL = 0
 
@@ -43,11 +43,13 @@ def open_client_socket():#outgoing_data):
         if sys.stdin in available_streams:
             msg_text = sys.stdin.readline()
             Message.send_msg(NORMAL, msg_text, ssl_socket)
+        continue
 
         # 8. if the server socket is available to read, read from it and print the message
         if ssl_socket in available_streams:
-            (msg_type, msg_text) = Message.receive_msg_from(ssl_socket)
-            print(msg_text)
+            msg_type, msg_text = Message.receive_msg_from(ssl_socket)
+            #print(msg_text)
+        continue
 
 
 
