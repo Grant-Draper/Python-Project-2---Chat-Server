@@ -11,9 +11,8 @@ HEADER_LENGTH = 8
 
 def send_msg(msg_type, msg_text, sock):
     """This function sends a message to a socket."""
-   #msg_text = msg_text[:-1]
-    print("sending ", msg_text)
-    full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
+
+    full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
 
     raw_send(sock, len(full_msg), full_msg)
 
@@ -44,13 +43,16 @@ def raw_receive(sock, length):
 
     chunks = []
     bytes_rx = 0
-
+    print("length = ", length)
     while bytes_rx < length:
+        print("bytes_rx =", bytes_rx)
         chunk = sock.recv(length - bytes_rx)
         if chunk == b'':
             raise RuntimeError("Socket connection broken")
+        print("chunks before append: ", chunks)
         chunks.append(chunk)
         bytes_rx += len(chunk)
+        print("new chunk, chunks: ", chunk, " ", chunks)
     return b''.join(chunks)
 
 

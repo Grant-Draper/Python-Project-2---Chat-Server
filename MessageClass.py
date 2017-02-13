@@ -35,9 +35,13 @@ class Message:
 
         try:
             # oringinal
-            #msg_text = raw_receive(sock, msg_length)
+            #msg_text = Message.raw_receive(sock, msg_length)
 
+            # working
             msg_text = Message.raw_receive(sock, msg_length).decode("utf-8")
+
+            #msg_text = Message.raw_receive(sock.decode("utf-8"), msg_length)
+
 
             return msg_type, msg_text
 
