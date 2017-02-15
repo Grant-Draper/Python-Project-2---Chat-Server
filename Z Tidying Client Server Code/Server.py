@@ -7,14 +7,11 @@
                 Modules:
 **********************************************************"""
 
-import pypyodbc
+import select
 import socket
 import ssl
-import json
-import select
-from ServerMessageClass import *
-from datetime import datetime
 
+from ServerMessageClass import *
 
 #Host = "192.168.1.201"
 Host = "127.0.0.1"

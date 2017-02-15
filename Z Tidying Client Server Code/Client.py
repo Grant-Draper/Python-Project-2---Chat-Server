@@ -7,15 +7,12 @@
                 Modules: pypyodbc 1.3.4
 **********************************************************"""
 
-
 import select
 import socket
 import ssl
 import sys
-import json
-from MessageClass import *
-from datetime import datetime
 
+from MessageClass import *
 
 #Host = "192.168.1.201"
 Host = "127.0.0.1"
