@@ -12,12 +12,14 @@ import socket
 import ssl
 import json
 import select
-from MessageClass import *
+from ServerMessageClass import *
 from datetime import datetime
 
 
-Host = "192.168.1.201"
+#Host = "192.168.1.201"
+Host = "127.0.0.1"
 Port = 30000
+
 
 
 def accept_new_client_connection(master_socket, client_sockets):
@@ -41,16 +43,16 @@ def accept_new_client_connection(master_socket, client_sockets):
 def receive_and_broadcast_message(readable_socket, client_sockets):
     """ receive message from readable_socket and send it to all sockets in client_sockets """
 
-    (msg_type, msg_text) = Message.receive_msg_from(readable_socket)
+    (msg_type, msg_text) = ServMessage.receive_msg_from(readable_socket)
 
-    Message.print_message(msg_type, msg_text)
+    ServMessage.print_message(msg_type, msg_text)
 
     # if this message is a normal message, send it to all clients.
     # for now this includes the client that sent it in the first place.
     if msg_type == 0:
     #if msg_type == NORMAL:
         for client_socket in client_sockets:
-            Message.send_msg(msg_type, msg_text, client_socket)
+            ServMessage.send_msg(msg_type, msg_text, client_socket)
 
 
 #

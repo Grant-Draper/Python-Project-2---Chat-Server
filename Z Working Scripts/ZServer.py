@@ -1,6 +1,6 @@
 import socket
 import select
-from TestMessage import *
+from ZServerMessage import *
 
 
 def accept_new_client_connection(listening_socket, client_sockets):
@@ -31,7 +31,9 @@ def receive_and_broadcast_message(readable_socket, client_sockets):
 
 
 # our address (we are the server)
-server_ip_address = '192.168.1.201'
+#server_ip_address = '192.168.1.201'
+server_ip_address = "127.0.0.1"
+
 server_port = 5000
 
 # 1. create a socket object

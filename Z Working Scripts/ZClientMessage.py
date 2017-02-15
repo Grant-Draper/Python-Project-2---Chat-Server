@@ -43,16 +43,16 @@ def raw_receive(sock, length):
 
     chunks = []
     bytes_rx = 0
-    print("length = ", length)
+    #print("length = ", length)
     while bytes_rx < length:
-        print("bytes_rx =", bytes_rx)
+        #print("bytes_rx =", bytes_rx)
         chunk = sock.recv(length - bytes_rx)
         if chunk == b'':
             raise RuntimeError("Socket connection broken")
-        print("chunks before append: ", chunks)
+        #print("chunks before append: ", chunks)
         chunks.append(chunk)
         bytes_rx += len(chunk)
-        print("new chunk, chunks: ", chunk, " ", chunks)
+        #print("new chunk, chunks: ", chunk, " ", chunks)
     return b''.join(chunks)
 
 

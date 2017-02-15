@@ -17,7 +17,8 @@ from MessageClass import *
 from datetime import datetime
 
 
-Host = "192.168.1.201"
+#Host = "192.168.1.201"
+Host = "127.0.0.1"
 Port = 30000
 NORMAL = 0
 

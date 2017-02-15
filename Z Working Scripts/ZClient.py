@@ -1,10 +1,12 @@
 import socket
 import select
 import sys
-from TestMessage import *
+from ZClientMessage import *
 
 # sever address to connect to
-server_ip_address = '192.168.1.201'
+#server_ip_address = '192.168.1.201'
+server_ip_address = "127.0.0.1"
+
 server_port = 5000
 
 # message types
