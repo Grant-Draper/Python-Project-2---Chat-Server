@@ -27,7 +27,7 @@ class Board:
                 str += " " + self.current_state[3*row + col] if self.current_state[3*row + col] else " " + " "
                 str += " #" if col < 2 else "\n"
             str += "### ### ###\n" if row < 2 else "\n"
-        print str
+        print(str)
 
     def reset(self):
         pass
