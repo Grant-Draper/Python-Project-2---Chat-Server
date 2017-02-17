@@ -11,7 +11,7 @@
 from ServerClass import *
 
 
-a = Server()
+a = Server("192.168.1.201", 30000)
 
 a.listening()
 

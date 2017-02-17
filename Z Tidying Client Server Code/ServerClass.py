@@ -4,9 +4,9 @@ import select
 import struct
 
 
-HOST = "192.168.1.201"
-#HOST = "127.0.0.1"
-PORT = 30000
+# HOST = "192.168.1.201"
+# #HOST = "127.0.0.1"
+# PORT = 30000
 
 class Server:
 
@@ -21,7 +21,7 @@ class Server:
     HEADER_LENGTH = 8
     client_sockets = []
 
-    def __init__(self):
+    def __init__(self, HOST, PORT):
 
         self.master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -60,7 +60,7 @@ class Server:
 
         # if this message is a normal message, send it to all clients.
         # for now this includes the client that sent it in the first place.
-        if msg_type == 0:
+        if msg_type == "NORMAL":
 
             for client_socket in client_sockets:
                 Server.send_msg(self, msg_type, msg_text, client_socket)
