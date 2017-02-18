@@ -30,16 +30,36 @@ import struct
 #
 # send_msg(NORMAL, "this is a test", server_socket)
 
-msg_text = "this is a test"
+# msg_text = "7his157h33nd".encode("utf-8")
+#
+# msg_text = bytes(msg_text)
+#
+# print(msg_text)
 
-full_msg = struct.pack('!LL', 0, len(msg_text) - 1) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
+
+msg_text = "blah blah blah" \
+           "woop de woop" \
+           "loop de loop"
+
+print(len(msg_text))
+print(msg_text.strip())
+print(len(msg_text.strip()))
+print(bytes(msg_text.strip().encode("utf-8")))
 
 
-byte = bytes("testy".encode("utf-8"))
 
 
-print(full_msg.decode("utf-8"))
 
-print(byte)
 
-print(byte.decode("utf-8"))
+
+# full_msg = struct.pack('!LL', 0, len(msg_text) - 1) + bytes(msg_text.strip().encode("utf-8"))  # cut off a newline     msg_text[:-1]
+#
+#
+# byte = bytes("testy".encode("utf-8"))
+#
+#
+# print(full_msg.decode("utf-8"))
+#
+# print(byte)
+#
+# print(byte.decode("utf-8"))
