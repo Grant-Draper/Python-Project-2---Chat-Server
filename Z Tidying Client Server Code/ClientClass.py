@@ -37,6 +37,19 @@ class Client:
 
             see tictac toe"""
 
+        print("\n")
+        print("Welcome to ChatterBox", "\n", "\n")
+        print("Log in page")
+
+        user = None
+        pswd = None
+
+        if self.get_username()[0]:
+            if self.get_pass()[0]:
+
+
+
+
 
 
 

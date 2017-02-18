@@ -19,7 +19,8 @@ print("\n")
 print("Welcome to ChatterBox", "\n", "\n")
 print("Log in page")
 
-Client.get_username()
+c1.get_username()
+c1.get_pass()
 
 
 
