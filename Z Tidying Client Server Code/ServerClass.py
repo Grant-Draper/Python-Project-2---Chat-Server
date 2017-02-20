@@ -2,6 +2,7 @@ import socket
 import ssl
 import select
 import struct
+from DatabaseClass import *
 
 
 # HOST = "192.168.1.201"
@@ -9,9 +10,7 @@ import struct
 # PORT = 30000
 
 class Server:
-
     client_sockets = []
-
 
     def __init__(self, HOST, PORT):
 
@@ -22,7 +21,6 @@ class Server:
 
     def start_master_socket(self):
         pass
-
 
     def accept_new_client_connection(self):  # , master_socket, client_sockets):
         """ accept a connection from a client and append it to the client_sockets list """
@@ -41,7 +39,6 @@ class Server:
         except Exception as e:
             print(e)
 
-
     def receive_and_broadcast_message(self, readable_socket, client_sockets):
         """ receive message from readable_socket and send it to all sockets in client_sockets """
 
@@ -51,7 +48,7 @@ class Server:
 
         # if this message is a normal message, send it to all clients.
         # for now this includes the client that sent it in the first place.
-        if msg_type == 0:   #NORMAL
+        if msg_type == 0:  # NORMAL
 
             for client_socket in client_sockets:
                 Message.send_msg(self, msg_type, msg_text, client_socket)
@@ -59,6 +56,17 @@ class Server:
         if msg_type == 1:  # JOIN
             pass
         if msg_type == 2:  # USER
+            print(msg_type, msg_text)
+            try:
+
+                """NEED TO CHANGE AND TEST THIS SECTION, should not be initialising the db here
+                    also test the exception handling. is it even needed, if the value not in the
+                    db then is error returned? or empty tuple?"""
+
+                d = Database()
+                print(Database.select_from_table_where(d, "ScreenName", "Users", "ScreenName", msg_text))
+            except Exception as e:
+                print(e)
             pass
         if msg_type == 3:  # PASS
             pass
@@ -68,7 +76,6 @@ class Server:
             pass
         if msg_type == 6:  # SERVER
             pass
-
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -86,12 +93,11 @@ class Server:
                 chunks.append(chunk)
                 bytes_rx += len(chunk)
 
-            return b''.join(chunks)
+                return b''.join(chunks)
 
         except Exception as e:
             print(e)
             Server.client_sockets.remove(sock)
-
 
     def raw_send(self, sock, length, data):
         """ This function sends raw data on a socket."""
@@ -103,7 +109,6 @@ class Server:
             if sent == 0:
                 raise RuntimeError("Socket send failure")
             total_sent = total_sent + sent
-
 
     def listening(self):
 
@@ -131,31 +136,27 @@ class Server:
 
 
 class Message:
-
-    TYPES = ["NORMAL",      # 0
-             "JOIN",        # 1
-             "USER",        # 2
-             "PASS",        # 3
-             "DIRECT",      # 4
-             "COMMAND",     # 5
-             "SERVER"]      # 6
+    TYPES = ["NORMAL",  # 0
+             "JOIN",  # 1
+             "USER",  # 2
+             "PASS",  # 3
+             "DIRECT",  # 4
+             "COMMAND",  # 5
+             "SERVER"]  # 6
 
     HEADER_LENGTH = 8
-
 
     def __init__(self):
         pass
 
-
     def send_msg(self, msg_type, msg_text, sock):
         """This function sends a message to a socket."""
 
-        print("sending ", msg_text)
+        # print("sending ", msg_text)
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
         Server.raw_send(self, sock, len(full_msg), full_msg)
-
 
     def receive_msg(self, sock):
         """This function waits for a message on a socket and returns the message type and text."""
@@ -170,7 +171,6 @@ class Message:
         except MemoryError as err:
             print("MemoryError: " + err.message)
             return None
-
 
     def print_message(self, msg_type, msg_text):
         """This function prints a message with the text length in a nice format."""

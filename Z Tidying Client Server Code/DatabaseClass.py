@@ -1,4 +1,5 @@
 import pypyodbc
+import pprint
 
 
 class Database:
@@ -9,11 +10,13 @@ class Database:
     sql_commands = [
         " SELECT ", " FROM ", " WHERE ", " AND ", " OR ",
         " INSERT INTO ", " VALUES ", " UPDATE ", " SET ",
-        " DELETE ", " TOP ", " = '{0}'" #use the last one with .format(value) to ensure quotes added to value
+        " DELETE ", " TOP "
     ]
 
+    # connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
+    #                               "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
     connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
-                                  "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
+                                  "Database=Test;""uid=DatabaseAdmin;pwd=Password01")
     cursor = connection.cursor()
 
 
@@ -106,6 +109,12 @@ class Database:
 
     def select_from_table_where(self, retrive_columns, table, comparison_column, clause):
 
+        """Function called "select_from_table_where", takes the arguments:
+            retrieve_columns = what you wan to return if the pattern is matched
+            table = where you want to look
+            comparison_column = what information do you want to compare with te clause
+            clause = the information you would like to compare. """
+
         action = ["SELECT ", "FROM ", " WHERE ", " = '{0}' "]
 
         if type(retrive_columns) != list:
@@ -117,8 +126,6 @@ class Database:
 
 
 
-
-
 d = Database()
 
 #d.add_line_to_table("MessageType", "MessageType", "'LEAVE'")
@@ -127,7 +134,9 @@ d = Database()
 
 #print(d.select_from_table(["Action, Description"], "Actions"))
 #print(d.select_from_table("MessageType", "MessageType"))
-#print(d.select_from_table("*", "MessageType"))
+#pprint.pprint(d.select_from_table("*", "MessageType"))
 
-print(select_from_table_where("ScreenName", "Users", "User_ID", "1"))
-print(select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))
+#print(d.select_from_table("ScreenName", "Users"))
+
+print(d.select_from_table_where("ScreenName", "Users", "User_ID", "1"))
+print(d.select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))
