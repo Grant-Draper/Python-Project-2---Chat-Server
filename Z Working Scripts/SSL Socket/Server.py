@@ -13,8 +13,8 @@ import ssl
 
 from ServerMessageClass import *
 
-#Host = "192.168.1.201"
-Host = "127.0.0.1"
+Host = "192.168.1.201"
+#Host = "127.0.0.1"
 Port = 30000
 
 

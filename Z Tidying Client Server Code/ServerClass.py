@@ -51,10 +51,23 @@ class Server:
 
         # if this message is a normal message, send it to all clients.
         # for now this includes the client that sent it in the first place.
-        if msg_type == 0:
+        if msg_type == 0:   #NORMAL
 
             for client_socket in client_sockets:
                 Message.send_msg(self, msg_type, msg_text, client_socket)
+
+        if msg_type == 1:  # JOIN
+            pass
+        if msg_type == 2:  # USER
+            pass
+        if msg_type == 3:  # PASS
+            pass
+        if msg_type == 4:  # DIRECT
+            pass
+        if msg_type == 5:  # COMMAND
+            pass
+        if msg_type == 6:  # SERVER
+            pass
 
 
     def raw_receive(self, sock, length):
@@ -73,7 +86,7 @@ class Server:
                 chunks.append(chunk)
                 bytes_rx += len(chunk)
 
-            return b''.join(chunks)
+                return b''.join(chunks)
 
         except Exception as e:
             print(e)
@@ -137,7 +150,7 @@ class Message:
     def send_msg(self, msg_type, msg_text, sock):
         """This function sends a message to a socket."""
 
-        print("sending ", msg_text)
+        #print("sending ", msg_text)
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
