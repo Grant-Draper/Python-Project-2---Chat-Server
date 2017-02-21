@@ -46,35 +46,32 @@ class Server:
 
         Message.print_message(self, msg_type, msg_text)
 
-        # if this message is a normal message, send it to all clients.
-        # for now this includes the client that sent it in the first place.
         if msg_type == 0:  # NORMAL
-
-            for client_socket in client_sockets:
-                Message.send_msg(self, msg_type, msg_text, client_socket)
+            Message.ao_normal_msg(msg, msg_text, readable_socket)
+            pass
 
         if msg_type == 1:  # JOIN
+            Message.ao_join_msg(msg, msg_text, readable_socket)
             pass
+
         if msg_type == 2:  # USER
-            print(msg_type, msg_text)
-            try:
-
-                """NEED TO CHANGE AND TEST THIS SECTION, should not be initialising the db here
-                    also test the exception handling. is it even needed, if the value not in the
-                    db then is error returned? or empty tuple?"""
-
-                d = Database()
-                print(Database.select_from_table_where(d, "ScreenName", "Users", "ScreenName", msg_text))
-            except Exception as e:
-                print(e)
+            Message.ao_user_msg(msg, msg_text, readable_socket)
             pass
+
         if msg_type == 3:  # PASS
+            Message.ao_pass_msg(msg, msg_text, readable_socket)
             pass
+
         if msg_type == 4:  # DIRECT
+            Message.ao_direct_msg(msg, msg_text, readable_socket)
             pass
+
         if msg_type == 5:  # COMMAND
+            Message.ao_command_msg(msg, msg_text, readable_socket)
             pass
+
         if msg_type == 6:  # SERVER
+            Message.ao_server_msg(msg, msg_text, readable_socket)
             pass
 
     def raw_receive(self, sock, length):
@@ -144,6 +141,16 @@ class Message:
              "COMMAND",  # 5
              "SERVER"]  # 6
 
+    # TYPES = {"NORMAL": 0,  # 0
+    #          "JOIN": 1,  # 1
+    #          "USER": 2,  # 2
+    #          "PASS": 3,  # 3
+    #          "DIRECT": 4,  # 4
+    #          "COMMAND": 5,  # 5
+    #          "SERVER": 6}  # 6
+
+    ## dictionary lookup string (next(iter({v for k, v in Message.TYPES.items() if k == "SERVER"})))
+
     HEADER_LENGTH = 8
 
     def __init__(self):
@@ -177,5 +184,83 @@ class Message:
 
         print(Message.TYPES[msg_type], len(msg_text), msg_text)
 
+    def ao_normal_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_normal_msg"
+            if this message is a normal message, send it to all clients.
+            this includes the client that sent it in the first place."""
+
+        for client_socket in Server.client_sockets:
+            # if client_socket is not readable_socket:
+            Message.send_msg(self, 6, msg_text, client_socket)
+        return
+
+    def ao_join_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_join_msg" """
+
+        return
+
+    def ao_user_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_user_msg" """
+
+        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
+
+        for value in values:
+            if type(value[0]) == str:
+                msg.send_msg(6, "Username OK", readable_socket)
+
+                return True, "Username OK"
+
+        return False, "Username not found"
+
+    def ao_pass_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_pass_msg" """
+
+        """the problem is that the username and password comes in two seperate messages
+            so as i check the username exists in the database, i then start to check the
+            password seperatly. but to check the password you need the username to check
+            aggainst, but then the username has to be stored or returned to the password
+            function. but returning might not work because of timing, e.g. what if 2 users
+            log in at about the same time, but due to network reasons the messages are
+            delayed. And you have the same problem with storing, if messages come in the
+            wrong order it will be overwritten.
+
+            and you dont want to permanently store, or whats the point of the db?
+
+            possibly build a query, adding the information as it arrives, so username comes in,
+             build part, password comes in finish rest and if password == data run query"""
+
+        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
+
+        for value in values:
+            if type(value[0]) == str:
+                msg.send_msg(6, "Username OK", readable_socket)
+
+                return True, "Password OK"
+
+        return False, "Username not found"
+
+    def ao_direct_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_direct_msg" """
+
+        return
+
+    def ao_command_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_command_msg" """
+
+        return
+
+    def ao_server_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_server_msg" """
+
+        return
 
 
+d = Database()
+msg = Message()
