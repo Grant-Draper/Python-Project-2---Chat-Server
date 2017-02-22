@@ -3,7 +3,7 @@ import select
 import ssl
 import sys
 import struct
-
+import hashlib
 
 # Message format is:
 #   4 bytes unsigned type
@@ -66,7 +66,8 @@ class Client:
                 pass
 
             elif len(pswd) > 7 and len(pswd) <= 50:
-                print("ok")
+                pswd = hashlib.sha512(pswd.encode("utf-8")).hexdigest()
+
                 return True, str(pswd)
 
     def check_credentials(self, user, pswd):
@@ -147,7 +148,8 @@ class Client:
                 elif msg_type == 5:  # COMMAND
                     break
                 elif msg_type == 6:  # SERVER
-                    Message.print_message(self, msg_type, msg_text)
+                    #Message.print_message(self, msg_type, msg_text)
+                    Client.partially_listening(self)
                     break
 
                     # Message.print_message(self, msg_type, msg_text)

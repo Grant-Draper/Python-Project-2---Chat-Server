@@ -2,6 +2,7 @@ import socket
 import ssl
 import select
 import struct
+from datetime import datetime
 from DatabaseClass import *
 
 
@@ -11,6 +12,7 @@ from DatabaseClass import *
 
 class Server:
     client_sockets = []
+    user_logins = {}
 
     def __init__(self, HOST, PORT):
 
@@ -209,7 +211,8 @@ class Message:
 
         for value in values:
             if type(value[0]) == str:
-                msg.send_msg(6, "Username OK", readable_socket)
+                Server.user_logins[value[0]] = datetime.now()
+                # msg.send_msg(6, "Username OK", readable_socket)
 
                 return True, "Username OK"
 
@@ -219,28 +222,25 @@ class Message:
 
         """Function called "ActionsOn_pass_msg" """
 
-        """the problem is that the username and password comes in two seperate messages
-            so as i check the username exists in the database, i then start to check the
-            password seperatly. but to check the password you need the username to check
-            aggainst, but then the username has to be stored or returned to the password
-            function. but returning might not work because of timing, e.g. what if 2 users
-            log in at about the same time, but due to network reasons the messages are
-            delayed. And you have the same problem with storing, if messages come in the
-            wrong order it will be overwritten.
+        """function working, now sending one message back to the client
+            server message type, log in successful. no need to start on the
+            next step of the client side user interaction, and the filtering
+            from what happens after recieving server message 6. i think simmilar
+            function layout to server, where it launches another function
 
-            and you dont want to permanently store, or whats the point of the db?
+            that function should filter by different server messages. potential
+            to be big eventually"""
 
-            possibly build a query, adding the information as it arrives, so username comes in,
-             build part, password comes in finish rest and if password == data run query"""
+        returned_screenname = d.select_screenname_if_passhash_matches(msg_text)
 
-        values = d.select_screenname_if_passhatch_matches(msg_text)
+        for value in returned_screenname:
 
-        for value in values:
             if type(value[0]) == str:
-                msg.send_msg(6, "Username OK", readable_socket)
+                if ('{0}'.format(value[0])) in Server.user_logins.keys():
+                    msg.send_msg(6, "Log in successful.", readable_socket)
+                    del Server.user_logins[value[0]]
 
-                return True, "Password OK"
-
+                    return True, "Password OK"
         return False, "Username not found"
 
     def ao_direct_msg(self, msg_text, readable_socket):
