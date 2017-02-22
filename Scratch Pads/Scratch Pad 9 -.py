@@ -36,17 +36,17 @@ import struct
 #
 # print(msg_text)
 
-
-msg_text = "blah blah blah" \
-           "woop de woop" \
-           "loop de loop"
-
-print(len(msg_text))
-print(msg_text.strip())
-print(len(msg_text.strip()))
-print(bytes(msg_text.strip().encode("utf-8")))
-
-
+#
+# msg_text = "blah blah blah" \
+#            "woop de woop" \
+#            "loop de loop"
+#
+# print(len(msg_text))
+# print(msg_text.strip())
+# print(len(msg_text.strip()))
+# print(bytes(msg_text.strip().encode("utf-8")))
+#
+#
 
 
 
@@ -63,3 +63,46 @@ print(bytes(msg_text.strip().encode("utf-8")))
 # print(byte)
 #
 # print(byte.decode("utf-8"))
+
+
+
+
+TYPES = {"NORMAL": 0,  # 0
+         "JOIN": 1,  # 1
+         "USER": 2,  # 2
+         "PASS": 3,  # 3
+         "DIRECT": 4,  # 4
+         "COMMAND": 5,  # 5
+         "SERVER": 6}  # 6
+
+print((next(iter({v for k, v in TYPES.items() if k == "SERVER"}))))
+print(v for k, v in TYPES.items() if k == "SERVER")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,6 +2,7 @@ import socket
 import ssl
 import select
 import struct
+from DatabaseClass import *
 
 
 # HOST = "192.168.1.201"
@@ -9,9 +10,7 @@ import struct
 # PORT = 30000
 
 class Server:
-
     client_sockets = []
-
 
     def __init__(self, HOST, PORT):
 
@@ -22,7 +21,6 @@ class Server:
 
     def start_master_socket(self):
         pass
-
 
     def accept_new_client_connection(self):  # , master_socket, client_sockets):
         """ accept a connection from a client and append it to the client_sockets list """
@@ -41,7 +39,6 @@ class Server:
         except Exception as e:
             print(e)
 
-
     def receive_and_broadcast_message(self, readable_socket, client_sockets):
         """ receive message from readable_socket and send it to all sockets in client_sockets """
 
@@ -49,26 +46,33 @@ class Server:
 
         Message.print_message(self, msg_type, msg_text)
 
-        # if this message is a normal message, send it to all clients.
-        # for now this includes the client that sent it in the first place.
-        if msg_type == 0:   #NORMAL
-
-            for client_socket in client_sockets:
-                Message.send_msg(self, msg_type, msg_text, client_socket)
+        if msg_type == 0:  # NORMAL
+            Message.ao_normal_msg(msg, msg_text, readable_socket)
+            pass
 
         if msg_type == 1:  # JOIN
-            pass
-        if msg_type == 2:  # USER
-            pass
-        if msg_type == 3:  # PASS
-            pass
-        if msg_type == 4:  # DIRECT
-            pass
-        if msg_type == 5:  # COMMAND
-            pass
-        if msg_type == 6:  # SERVER
+            Message.ao_join_msg(msg, msg_text, readable_socket)
             pass
 
+        if msg_type == 2:  # USER
+            Message.ao_user_msg(msg, msg_text, readable_socket)
+            pass
+
+        if msg_type == 3:  # PASS
+            Message.ao_pass_msg(msg, msg_text, readable_socket)
+            pass
+
+        if msg_type == 4:  # DIRECT
+            Message.ao_direct_msg(msg, msg_text, readable_socket)
+            pass
+
+        if msg_type == 5:  # COMMAND
+            Message.ao_command_msg(msg, msg_text, readable_socket)
+            pass
+
+        if msg_type == 6:  # SERVER
+            Message.ao_server_msg(msg, msg_text, readable_socket)
+            pass
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -92,7 +96,6 @@ class Server:
             print(e)
             Server.client_sockets.remove(sock)
 
-
     def raw_send(self, sock, length, data):
         """ This function sends raw data on a socket."""
 
@@ -103,7 +106,6 @@ class Server:
             if sent == 0:
                 raise RuntimeError("Socket send failure")
             total_sent = total_sent + sent
-
 
     def listening(self):
 
@@ -131,31 +133,37 @@ class Server:
 
 
 class Message:
+    TYPES = ["NORMAL",  # 0
+             "JOIN",  # 1
+             "USER",  # 2
+             "PASS",  # 3
+             "DIRECT",  # 4
+             "COMMAND",  # 5
+             "SERVER"]  # 6
 
-    TYPES = ["NORMAL",      # 0
-             "JOIN",        # 1
-             "USER",        # 2
-             "PASS",        # 3
-             "DIRECT",      # 4
-             "COMMAND",     # 5
-             "SERVER"]      # 6
+    # TYPES = {"NORMAL": 0,  # 0
+    #          "JOIN": 1,  # 1
+    #          "USER": 2,  # 2
+    #          "PASS": 3,  # 3
+    #          "DIRECT": 4,  # 4
+    #          "COMMAND": 5,  # 5
+    #          "SERVER": 6}  # 6
+
+    ## dictionary lookup string (next(iter({v for k, v in Message.TYPES.items() if k == "SERVER"})))
 
     HEADER_LENGTH = 8
-
 
     def __init__(self):
         pass
 
-
     def send_msg(self, msg_type, msg_text, sock):
         """This function sends a message to a socket."""
 
-        #print("sending ", msg_text)
+        # print("sending ", msg_text)
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
         Server.raw_send(self, sock, len(full_msg), full_msg)
-
 
     def receive_msg(self, sock):
         """This function waits for a message on a socket and returns the message type and text."""
@@ -171,11 +179,88 @@ class Message:
             print("MemoryError: " + err.message)
             return None
 
-
     def print_message(self, msg_type, msg_text):
         """This function prints a message with the text length in a nice format."""
 
         print(Message.TYPES[msg_type], len(msg_text), msg_text)
 
+    def ao_normal_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_normal_msg"
+            if this message is a normal message, send it to all clients.
+            this includes the client that sent it in the first place."""
+
+        for client_socket in Server.client_sockets:
+            # if client_socket is not readable_socket:
+            Message.send_msg(self, 6, msg_text, client_socket)
+        return
+
+    def ao_join_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_join_msg" """
+
+        return
+
+    def ao_user_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_user_msg" """
+
+        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
+
+        for value in values:
+            if type(value[0]) == str:
+                msg.send_msg(6, "Username OK", readable_socket)
+
+                return True, "Username OK"
+
+        return False, "Username not found"
+
+    def ao_pass_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_pass_msg" """
+
+        """the problem is that the username and password comes in two seperate messages
+            so as i check the username exists in the database, i then start to check the
+            password seperatly. but to check the password you need the username to check
+            aggainst, but then the username has to be stored or returned to the password
+            function. but returning might not work because of timing, e.g. what if 2 users
+            log in at about the same time, but due to network reasons the messages are
+            delayed. And you have the same problem with storing, if messages come in the
+            wrong order it will be overwritten.
+
+            and you dont want to permanently store, or whats the point of the db?
+
+            possibly build a query, adding the information as it arrives, so username comes in,
+             build part, password comes in finish rest and if password == data run query"""
+
+        values = d.select_screenname_if_passhatch_matches(msg_text)
+
+        for value in values:
+            if type(value[0]) == str:
+                msg.send_msg(6, "Username OK", readable_socket)
+
+                return True, "Password OK"
+
+        return False, "Username not found"
+
+    def ao_direct_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_direct_msg" """
+
+        return
+
+    def ao_command_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_command_msg" """
+
+        return
+
+    def ao_server_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_server_msg" """
+
+        return
 
 
+d = Database()
+msg = Message()

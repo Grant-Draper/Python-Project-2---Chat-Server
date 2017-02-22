@@ -46,27 +46,45 @@
 
 
 ## INSERT INTO Single and Multiple Tester
+#
+# def insert_into_table(table, columns, values):
+#
+#     action = "INSERT INTO "
+#
+#     if type(columns) != list:
+#
+#         sqlcode = action + table + " ({0})".format(columns) + " VALUES ({0})".format(values)
+#     else:
+#         sqlcode = action + table + " ({0})".format(*columns) + " VALUES ({0})".format(*values)
+#
+#     print(sqlcode)
+#
+#     pass
+#
+# insert_into_table("MessageType", "MessageType", "'JOIN'")
+# insert_into_table("Actions", ["Action, Description"], ["'Test', 'This is test input 4'"])
+#
 
-def insert_into_table(table, columns, values):
 
-    action = "INSERT INTO "
+## SELECT FROM WHERE Tester
 
-    if type(columns) != list:
+def select_from_table_where(retrive_columns, table, comparison_column, clause):
 
-        sqlcode = action + table + " ({0})".format(columns) + " VALUES ({0})".format(values)
+    action = ["SELECT ", "FROM ", " WHERE ", " = '{0}' "]
+    #print(type(retrive_columns))
+
+    if type(retrive_columns) != list:
+        sqlcode = action[0] + " {0} ".format(retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
+
     else:
-        sqlcode = action + table + " ({0})".format(*columns) + " VALUES ({0})".format(*values)
+        sqlcode = action[0] + " {0} ".format(*retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
 
     print(sqlcode)
 
     pass
 
-insert_into_table("MessageType", "MessageType", "'JOIN'")
-insert_into_table("Actions", ["Action, Description"], ["'Test', 'This is test input 4'"])
-
-
-
-
+select_from_table_where("ScreenName", "Users", "User_ID", "1" )
+select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1")
 
 
 

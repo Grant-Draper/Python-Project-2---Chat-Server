@@ -3,7 +3,7 @@ import select
 import ssl
 import sys
 import struct
-import hashlib
+
 
 # Message format is:
 #   4 bytes unsigned type
@@ -31,14 +31,6 @@ class Client:
 
     def user_log_in(self):
 
-        """need to run the get uname and pass functions, then pass it through cred
-            checker, this will validate login, then can just print logged in.
-
-            something like, if Client.get_username()[0] == True and Client.get_pass()[0] == True
-                                Client.cred_checker
-
-            see tictac toe"""
-
         print("\n")
         print("Welcome to ChatterBox", "\n", "\n")
         print("Log in page")
@@ -47,15 +39,8 @@ class Client:
         pswd = self.get_pass()
 
         if user[0] is True and pswd[0] is True:
-            #print(user[1], pswd[1])
+            # print(user[1], pswd[1])
             self.check_credentials(user[1], pswd[1])
-
-
-
-
-
-
-
 
     def get_username(self):
 
@@ -81,22 +66,21 @@ class Client:
                 pass
 
             elif len(pswd) > 7 and len(pswd) <= 50:
-                pswd = hashlib.sha512(pswd.encode("utf-8")).hexdigest()
                 print("ok")
                 return True, str(pswd)
 
     def check_credentials(self, user, pswd):
 
         log_in_msg = Message()
-        #print(repr(Message.TYPES["USER"], user, Client.sockets[-1]))
-        print(type(Message.TYPES["USER"]), type(user), type(Client.sockets[-1]))
-        # log_in_msg.send_msg(Message.TYPES["USER"], user, Client.sockets[-1])
 
-        Message.send_msg(self, Message.TYPES["USER"], user, Client.sockets[-1])
+        log_in_msg.send_static_msg(Message.TYPES["USER"], user, Client.sockets[-1])
+        log_in_msg.send_static_msg(Message.TYPES["PASS"], pswd, Client.sockets[-1])
+
+        Client.partially_listening(self)
 
 
-        #print(self, Message.TYPES["USER"], user, self.ssl_socket)
-        #Message.send_msg(self, Message.TYPES["PASS"], pswd, self.ssl_socket)
+        # print(self, Message.TYPES["USER"], user, self.ssl_socket)
+        # Message.send_msg(self, Message.TYPES["PASS"], pswd, self.ssl_socket)
 
     def listening(self):
 
@@ -118,6 +102,55 @@ class Client:
 
             except Exception as e:
                 Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
+
+    def partially_listening(self):
+
+        """ Need to create a filter to act on different message types sent back by the server
+            this needs to only listen to the select statement, not stdin. if you start the
+            listening loop then you cannot exit from it, at the moment, possibly need an escape
+            sequence.
+
+            this filter should match a type then perform a specific output, and eventually restart
+            the listening loop.
+
+            need to redesign the database as the relationships are wrong at the moment,
+            need to add extra entitys for expansion, see paper notes.
+
+            also need to input test data into the database before upsize, this will allow proper
+            testing of the select, update and removal statments."""
+
+
+        while True:
+
+            # 6. check if input has been received from stdin or the server_socket
+            available_streams, _, _ = select.select([self.ssl_socket], [], [], 1)
+
+            # 8. if the server socket is available to read, read from it and print the message
+            if self.ssl_socket in available_streams:
+
+                msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
+
+                if msg_type == 0:  # NORMAL
+                    #Message.print_message(self, msg_type, msg_text)
+                    #print(msg_type, msg_text)
+                    break
+                elif msg_type == 1:  # JOIN
+                    break
+                elif msg_type == 2:  # USER
+                    Message.print_message(self, msg_type, msg_text)
+                    print(msg_type, msg_text)
+                    break
+                elif msg_type == 3:  # PASS
+                    break
+                elif msg_type == 4:  # DIRECT
+                    break
+                elif msg_type == 5:  # COMMAND
+                    break
+                elif msg_type == 6:  # SERVER
+                    Message.print_message(self, msg_type, msg_text)
+                    break
+
+                    # Message.print_message(self, msg_type, msg_text)
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -149,15 +182,14 @@ class Client:
             total_sent = total_sent + sent
 
 
-
 class Message:
-    TYPES = {"NORMAL": 0,   # 0
-             "JOIN": 1,     # 1
-             "USER": 2,     # 2
-             "PASS": 3,     # 3
-             "DIRECT": 4,   # 4
+    TYPES = {"NORMAL": 0,  # 0
+             "JOIN": 1,  # 1
+             "USER": 2,  # 2
+             "PASS": 3,  # 3
+             "DIRECT": 4,  # 4
              "COMMAND": 5,  # 5
-             "SERVER": 6}   # 6
+             "SERVER": 6}  # 6
     HEADER_LENGTH = 8
 
     def __init__(self):
@@ -189,5 +221,13 @@ class Message:
         """This function prints a message with the text length in a nice format."""
 
         print((next(iter({k for k, v in Message.TYPES.items() if v == msg_type}))), len(msg_text), msg_text)
+
+    def send_static_msg(self, msg_type, msg_text, sock):
+        """This function sends a message to a socket."""
+
+        full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
+            msg_text.strip().encode("utf-8"))  # cut off a newline
+
+        Client.raw_send(self, sock, len(full_msg), full_msg)
 
 
