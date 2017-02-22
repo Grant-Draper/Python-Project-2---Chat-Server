@@ -116,6 +116,14 @@ class Database:
             return Database.fetch_data(self, sqlcode)
 
 
+    def select_screenname_if_passhash_matches(self, ):
+
+
+
+
+
+
+        return
 
 
 
@@ -129,5 +137,5 @@ d = Database()
 #print(d.select_from_table("MessageType", "MessageType"))
 #print(d.select_from_table("*", "MessageType"))
 
-print(select_from_table_where("ScreenName", "Users", "User_ID", "1"))
-print(select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))
+# print(select_from_table_where("ScreenName", "Users", "User_ID", "1"))
+# print(select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))

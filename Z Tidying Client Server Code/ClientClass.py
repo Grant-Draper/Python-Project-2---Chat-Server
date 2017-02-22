@@ -3,7 +3,7 @@ import select
 import ssl
 import sys
 import struct
-
+import hashlib
 
 # Message format is:
 #   4 bytes unsigned type
@@ -81,6 +81,7 @@ class Client:
                 pass
 
             elif len(pswd) > 7 and len(pswd) <= 50:
+                pswd = hashlib.sha512(pswd.encode("utf-8")).hexdigest()
                 print("ok")
                 return True, str(pswd)
 

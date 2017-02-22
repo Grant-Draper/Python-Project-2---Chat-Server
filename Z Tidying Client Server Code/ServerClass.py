@@ -233,7 +233,7 @@ class Message:
             possibly build a query, adding the information as it arrives, so username comes in,
              build part, password comes in finish rest and if password == data run query"""
 
-        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
+        values = d.select_screenname_if_passhatch_matches(msg_text)
 
         for value in values:
             if type(value[0]) == str:
