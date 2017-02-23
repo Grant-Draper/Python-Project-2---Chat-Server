@@ -15,20 +15,8 @@ from NewClientClass import *
 c1 = Client("192.168.1.201", 30000)
 
 #c1.listening()
-#c1.partially_listening()
-
-
-
-# print("\n")
-# print("Welcome to ChatterBox", "\n", "\n")
-# print("Log in page")
-#
-# c1.get_username()
-# c1.get_pass()
-
-
-c1.user_log_in()
-
+#c1.user_log_in()
+c1.initial_options()
 
 
 

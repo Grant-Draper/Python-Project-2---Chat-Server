@@ -53,12 +53,11 @@ class Client:
             Client.user_log_in(self)
             pass
         if selection == 2:  # Create New Account
-            print("create new user fn")
             Client.create_new_user(self)
-
             pass
 
     def create_new_user(self):
+
         pass
 
     def user_log_in(self):
@@ -71,7 +70,6 @@ class Client:
         pswd = self.get_pass()
 
         if user[0] is True and pswd[0] is True:
-            # print(user[1], pswd[1])
             self.check_credentials(user[1], pswd[1])
 
     def get_username(self):
@@ -97,7 +95,7 @@ class Client:
                 pass
 
             elif len(pswd) > 7 and len(pswd) <= 50:
-                pswd = hashlib.sha512(pswd.encode("utf-8")).hexdigest()
+                pswd = hashlib.sha3_512(pswd.encode("utf-8")).hexdigest()
 
                 return True, str(pswd)
 
@@ -110,9 +108,6 @@ class Client:
 
         Client.partially_listening(self)
 
-
-        # print(self, Message.TYPES["USER"], user, self.ssl_socket)
-        # Message.send_msg(self, Message.TYPES["PASS"], pswd, self.ssl_socket)
 
     def main_menu(self, user):
 
@@ -142,7 +137,6 @@ class Client:
         while True:
             selection = Client.input_only_int(self)
             if (selection - 1) in range(0, len(list)):
-                print("selection ok")
                 return selection
 
     def input_only_int(self):

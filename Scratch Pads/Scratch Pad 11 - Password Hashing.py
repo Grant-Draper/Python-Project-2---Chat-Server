@@ -1,5 +1,5 @@
 import hashlib, uuid
-
+"""
 password = "brainsno"
 
 salt = uuid.uuid4().hex
@@ -21,7 +21,7 @@ hashed_pass_nosalt4 = hashlib.sha512((password).encode("utf-8")).hexdigest()
 print("hashed pass, without salt 4", hashed_pass_nosalt4)
 
 
-
+"""
 ## SQL code working to find screename, if password matches
 """
 select ScreenName
@@ -33,7 +33,9 @@ on Users.User_ID=Passwords.User_ID
 where Passwords.Password='nofear';
 """
 
-
+password = "thepretender"
+hashed_password = hashlib.sha3_512(password.encode("utf-8")).hexdigest()
+print(hashed_password)
 
 
 

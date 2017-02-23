@@ -68,26 +68,36 @@
 
 ## SELECT FROM WHERE Tester
 
-def select_from_table_where(retrive_columns, table, comparison_column, clause):
+#def select_from_table_where(retrive_columns, table, comparison_column, clause):
+#
+#    action = ["SELECT ", "FROM ", " WHERE ", " = '{0}' "]
+#    #print(type(retrive_columns))
+#
+#    if type(retrive_columns) != list:
+#        sqlcode = action[0] + " {0} ".format(retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
+#
+#    else:
+#        sqlcode = action[0] + " {0} ".format(*retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
+#
+#    print(sqlcode)
+#
+#    pass
+#
+#select_from_table_where("ScreenName", "Users", "User_ID", "1" )
+#select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1")
 
-    action = ["SELECT ", "FROM ", " WHERE ", " = '{0}' "]
-    #print(type(retrive_columns))
 
-    if type(retrive_columns) != list:
-        sqlcode = action[0] + " {0} ".format(retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
+def create_new_user(fname, lname, sname, pass_hash):
 
-    else:
-        sqlcode = action[0] + " {0} ".format(*retrive_columns) + action[1] + table + action[2] + " {0} ".format(comparison_column) + action[3].format(clause)
+    """"""
 
+    sqlcode = "insert into dbo.Users (FirstName, LastName, ScreenName) values ('{0}', '{1}', '{2}') insert into dbo.Passwords([HashedPassword], [CurrentPassword], [User_ID]) values ('{3}', 1, SCOPE_IDENTITY())".format(fname, lname, sname, pass_hash)
     print(sqlcode)
 
-    pass
-
-select_from_table_where("ScreenName", "Users", "User_ID", "1" )
-select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1")
 
 
 
+create_new_user("grant", "draper", "gdawg", "siofvsndfcvlsknc")
 
 
 
