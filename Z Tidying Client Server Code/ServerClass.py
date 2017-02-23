@@ -203,6 +203,8 @@ class Message:
 
         return
 
+
+
     def ao_user_msg(self, msg_text, readable_socket):
 
         """Function called "ActionsOn_user_msg" """
@@ -211,37 +213,37 @@ class Message:
 
         for value in values:
             if type(value[0]) == str:
+
                 Server.user_logins[value[0]] = datetime.now()
                 # msg.send_msg(6, "Username OK", readable_socket)
-
                 return True, "Username OK"
+            else:
+                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
 
         return False, "Username not found"
+
+
 
     def ao_pass_msg(self, msg_text, readable_socket):
 
         """Function called "ActionsOn_pass_msg" """
-
-        """function working, now sending one message back to the client
-            server message type, log in successful. no need to start on the
-            next step of the client side user interaction, and the filtering
-            from what happens after recieving server message 6. i think simmilar
-            function layout to server, where it launches another function
-
-            that function should filter by different server messages. potential
-            to be big eventually"""
-
         returned_screenname = d.select_screenname_if_passhash_matches(msg_text)
 
         for value in returned_screenname:
-
             if type(value[0]) == str:
+
                 if ('{0}'.format(value[0])) in Server.user_logins.keys():
-                    msg.send_msg(6, "Log in successful.", readable_socket)
+                    msg.send_msg(6, "Login Successful.", readable_socket)
                     del Server.user_logins[value[0]]
 
                     return True, "Password OK"
-        return False, "Username not found"
+            else:
+                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+        else:
+            msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+
+        return False, "Login Unsuccessful."
+
 
     def ao_direct_msg(self, msg_text, readable_socket):
 
@@ -264,3 +266,4 @@ class Message:
 
 d = Database()
 msg = Message()
+
