@@ -24,7 +24,7 @@ class Database:
     # connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
     #                               "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
     connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
-                                  "Database=Test;""uid=DatabaseAdmin;pwd=Password01")
+                                  "Database=Test3;""uid=DatabaseAdmin;pwd=Password01")
     cursor = connection.cursor()
 
     def execute_sqlcode(self, sqlcode):
@@ -121,16 +121,23 @@ class Database:
 
     def select_screenname_if_passhash_matches(self, pswd):
 
-        sqlcode = "select ScreenName from Users inner join Passwords on Users.User_ID=Passwords.User_ID where Passwords.Password='{0}'".format(pswd)
+        """Function with a single argument, designed to check a hashed password value
+            against the passwords in the database, that are linked to a user account.
+            the function will check 2 things, the password exists and it is marked as
+             the current password. if the value is matched, the function will return the
+             screenname of the user it is linked to. this can then be compared to the
+             screenname provided by the user."""
+
+        sqlcode = "select ScreenName from Users inner join Passwords on Users.User_ID=Passwords.User_ID where Passwords.HashedPassword='{0}' and Passwords.CurrentPassword=1".format(pswd)
 
         user = (Database.fetch_data(self, sqlcode))
 
         return user
 
 
-d = Database()
+#d = Database()
 
-#d.select_screenname_if_passhash_matches("nofear")
+#print(d.select_screenname_if_passhash_matches("nofear"))
 
 # d.add_line_to_table("MessageType", "MessageType", "'LEAVE'")
 # d.add_line_to_table("Actions", ["Action, Description"], ["'Test', 'This is test input 3'"])

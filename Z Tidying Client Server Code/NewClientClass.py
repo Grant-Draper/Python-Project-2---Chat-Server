@@ -3,6 +3,7 @@ import select
 import ssl
 import sys
 import struct
+import hashlib
 
 
 # Message format is:
@@ -14,6 +15,13 @@ import struct
 class Client:
     server_details = []
     sockets = []
+    INITIAL_OPTIONS = ["1:     Log In",
+                       "2:     Create New Account"]
+
+    MAIN_MENU = ["1:    Chatrooms",
+                 "2:    Friends",
+                 "3:    Server Information",
+                 "4:    Log Out"]
 
     def __init__(self, HOST, PORT):
 
@@ -29,11 +37,35 @@ class Client:
             print("Completed with Exception1.", "\n")
             pass
 
+    def initial_options(self):
+
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Initial menu", "\n")
+
+        for option in Client.INITIAL_OPTIONS:
+            print(option)
+        print("\n")
+
+        selection = Client.option_input_valid(self, Client.INITIAL_OPTIONS)
+
+        if selection == 1:  # Log In
+            Client.user_log_in(self)
+            pass
+        if selection == 2:  # Create New Account
+            print("create new user fn")
+            Client.create_new_user(self)
+
+            pass
+
+    def create_new_user(self):
+        pass
+
     def user_log_in(self):
 
         print("\n")
-        print("Welcome to ChatterBox", "\n", "\n")
-        print("Log in page")
+        print("ChatterBox", "\n", "\n")
+        print("Log in page", "\n")
 
         user = self.get_username()
         pswd = self.get_pass()
@@ -52,7 +84,6 @@ class Client:
                 pass
 
             elif len(user) <= 20:
-                print("ok")
                 return True, str(user)
 
     def get_pass(self):
@@ -66,7 +97,8 @@ class Client:
                 pass
 
             elif len(pswd) > 7 and len(pswd) <= 50:
-                print("ok")
+                pswd = hashlib.sha512(pswd.encode("utf-8")).hexdigest()
+
                 return True, str(pswd)
 
     def check_credentials(self, user, pswd):
@@ -81,6 +113,49 @@ class Client:
 
         # print(self, Message.TYPES["USER"], user, self.ssl_socket)
         # Message.send_msg(self, Message.TYPES["PASS"], pswd, self.ssl_socket)
+
+    def main_menu(self, user):
+
+        print("\n")
+        print("Welcome to ChatterBox {0}".format(user), "\n", "\n")
+        print("Main Menu", "\n")
+
+        for option in Client.MAIN_MENU:
+            print(option)
+
+        print("\n")
+
+        selection = Client.option_input_valid(self, Client.MAIN_MENU)
+
+        if selection == 1:  # Chatrooms
+
+            pass
+        if selection == 2:  # Friends
+            pass
+        if selection == 3:  # Server Info
+            pass
+        if selection == 4:  # Log Out
+            pass
+
+    def option_input_valid(self, list):
+
+        while True:
+            selection = Client.input_only_int(self)
+            if (selection - 1) in range(0, len(list)):
+                print("selection ok")
+                return selection
+
+    def input_only_int(self):
+
+        selection = None
+        while selection == None:
+            try:
+                print("Please select by typing the option number:")
+                selection = int(input())
+
+            except ValueError:
+                print("Input invalid, please enter a valid option number")
+        return selection
 
     def listening(self):
 
@@ -119,7 +194,6 @@ class Client:
             also need to input test data into the database before upsize, this will allow proper
             testing of the select, update and removal statments."""
 
-
         while True:
 
             # 6. check if input has been received from stdin or the server_socket
@@ -131,26 +205,41 @@ class Client:
                 msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
 
                 if msg_type == 0:  # NORMAL
-                    #Message.print_message(self, msg_type, msg_text)
-                    #print(msg_type, msg_text)
-                    break
-                elif msg_type == 1:  # JOIN
-                    break
-                elif msg_type == 2:  # USER
-                    Message.print_message(self, msg_type, msg_text)
-                    print(msg_type, msg_text)
-                    break
-                elif msg_type == 3:  # PASS
-                    break
-                elif msg_type == 4:  # DIRECT
-                    break
-                elif msg_type == 5:  # COMMAND
-                    break
-                elif msg_type == 6:  # SERVER
-                    Message.print_message(self, msg_type, msg_text)
-                    break
+                    Message.ao_normal_msg(msg, msg_text)
 
                     # Message.print_message(self, msg_type, msg_text)
+                    # print(msg_type, msg_text)
+                    break
+
+                elif msg_type == 1:  # JOIN
+                    Message.ao_join_msg(msg, msg_text)
+                    break
+
+                elif msg_type == 2:  # USER
+                    Message.ao_user_msg(msg, msg_text)
+
+                    # Message.print_message(self, msg_type, msg_text)
+                    # print(msg_type, msg_text)
+                    break
+
+                elif msg_type == 3:  # PASS
+                    Message.ao_pass_msg(msg, msg_text)
+                    break
+
+                elif msg_type == 4:  # DIRECT
+                    Message.ao_direct_msg(msg, msg_text)
+                    break
+
+                elif msg_type == 5:  # COMMAND
+                    Message.ao_command_msg(msg, msg_text)
+                    break
+
+                elif msg_type == 6:  # SERVER
+                    Message.ao_server_msg(msg, msg_text)
+
+                    # Message.print_message(self, msg_type, msg_text)
+                    # Client.partially_listening(self)
+                    break
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -230,4 +319,55 @@ class Message:
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
 
+    def ao_normal_msg(self, msg_text):
 
+        """Function called "ActionsOn_normal_msg" """
+
+        return
+
+    def ao_join_msg(self, msg_text):
+
+        """Function called "ActionsOn_join_msg" """
+
+        return
+
+    def ao_user_msg(self, msg_text):
+
+        """Function called "ActionsOn_user_msg" """
+
+        return
+
+    def ao_pass_msg(self, msg_text):
+
+        """Function called "ActionsOn_pass_msg" """
+
+        return
+
+    def ao_direct_msg(self, msg_text):
+
+        """Function called "ActionsOn_direct_msg" """
+
+        return
+
+    def ao_command_msg(self, msg_text):
+
+        """Function called "ActionsOn_command_msg" """
+
+        return
+
+    def ao_server_msg(self, msg_text):
+
+        """Function called "ActionsOn_server_msg" """
+
+        # print(Message.print_message(self, 6, msg_text))
+
+        if msg_text == "Login Successful.":
+            print("login ok")
+
+        elif msg_text == "Login Unsuccessful.":
+            print("no login")
+
+        return
+
+
+msg = Message()
