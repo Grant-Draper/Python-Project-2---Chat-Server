@@ -135,7 +135,21 @@ class Database:
         return user
 
 
+    def create_new_user(self, fname, lname, sname, pass_hash):
+
+        """"""
+
+        sqlcode = "insert into dbo.Users (FirstName, LastName, ScreenName) values ('{0}', '{1}', '{2}') insert into dbo.Passwords([HashedPassword], [CurrentPassword], [User_ID]) values ('{3}', 1, SCOPE_IDENTITY())".format(fname, lname, sname, pass_hash)
+        print(sqlcode)
+
+
 #d = Database()
+
+Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)
+
+
+
+
 
 #print(d.select_screenname_if_passhash_matches("nofear"))
 
