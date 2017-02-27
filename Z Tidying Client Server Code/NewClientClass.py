@@ -27,16 +27,19 @@ class Client:
 
     CHATROOM_MENU = ["1:    View Available Chatrooms",
                      "2:    Join Chatroom",
-                     "3:    Create Chatroom"]
+                     "3:    Create Chatroom \n",
+                     "4:    Main Menu"]
 
     FRIENDS_MENU = ["1:     View Friends",
                     "2:     Message Friend",
                     "3:     Add Friend",
-                    "4:     Remove Friend"]
+                    "4:     Remove Friend \n",
+                    "5:     Main Menu"]
 
-    SERVER_INFO = ["1:      Uptime",
-                   "2:      Total Number of Registered Users",
-                   "3:      Total Number of Chatrooms"]
+    SERVER_INFO_MENU = ["1:      Uptime",
+                        "2:      Total Number of Registered Users",
+                        "3:      Total Number of Chatrooms \n",
+                        "4:      Main Menu"]
 
     def __init__(self, HOST, PORT):
 
@@ -99,8 +102,6 @@ class Client:
 
         msg.send_static_msg(Message.TYPES["COMMAND"], user, Client.sockets[-1])
         Client.partially_listening(self)
-
-
 
     def user_log_in(self):
 
@@ -170,7 +171,6 @@ class Client:
         msg.send_static_msg(Message.TYPES["USER"], user, Client.sockets[-1])
         msg.send_static_msg(Message.TYPES["PASS"], pswd, Client.sockets[-1])
 
-
         Client.current_user = user
         Client.partially_listening(self)
 
@@ -191,11 +191,13 @@ class Client:
             Client.chatroom_menu(self)
             pass
         if selection == 2:  # Friends
-
+            Client.friends_menu(self)
             pass
         if selection == 3:  # Server Info
+            Client.server_menu(self)
             pass
         if selection == 4:  # Log Out
+            Client.initial_options(self)
             pass
 
     def chatroom_menu(self):
@@ -216,9 +218,55 @@ class Client:
             pass
         if selection == 3:  # Create a chatroom
             pass
+        if selection == 4:  # Main menu
+            Client.main_menu(self, Client.current_user)
+            pass
 
+    def friends_menu(self):
 
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Friends Menu", "\n")
 
+        for option in Client.FRIENDS_MENU:
+            print(option)
+        print("\n")
+
+        selection = Client.option_input_valid(self, Client.FRIENDS_MENU)
+
+        if selection == 1:  # View
+            pass
+        if selection == 2:  # Message
+            pass
+        if selection == 3:  # Add
+            pass
+        if selection == 4:  # Remove
+            pass
+        if selection == 5:  # Main menu
+            Client.main_menu(self, Client.current_user)
+            pass
+
+    def server_menu(self):
+
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Server Menu", "\n")
+
+        for option in Client.SERVER_INFO_MENU:
+            print(option)
+        print("\n")
+
+        selection = Client.option_input_valid(self, Client.SERVER_INFO_MENU)
+
+        if selection == 1:  # Uptime
+            pass
+        if selection == 2:  # Users total
+            pass
+        if selection == 3:  # Chatrooms total
+            pass
+        if selection == 4:  # Main menu
+            Client.main_menu(self, Client.current_user)
+            pass
 
     def option_input_valid(self, list):
 
@@ -409,29 +457,26 @@ class Client:
             print("Account Successfully registered.")
             Client.initial_options(self)
 
-#
-# class Chatroom:
-#
-#
-#
-#
-#     def __init__(self, name):
-#
-#         self.members = {}
-#         self.name = name
-#         pass
-#
-#     def member_join(self, member, member_socket):
-#         self.members[member] = member_socket
-#         pass
-#
-#     def member_leave(self, member):
-#         del self.members[member]
-#         pass
-#
-#
+
+"""
+ class Chatroom:
 
 
+     def __init__(self, name):
+
+         self.members = {}
+         self.name = name
+         pass
+
+     def member_join(self, member, member_socket):
+         self.members[member] = member_socket
+         pass
+
+     def member_leave(self, member):
+         del self.members[member]
+         pass
+
+"""
 
 
 class Message:
@@ -481,7 +526,6 @@ class Message:
             msg_text.strip().encode("utf-8"))  # cut off a newline
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
-
 
 
 msg = Message()
