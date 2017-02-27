@@ -44,36 +44,38 @@ class Server:
     def receive_and_broadcast_message(self, readable_socket, client_sockets):
         """ receive message from readable_socket and send it to all sockets in client_sockets """
 
-        (msg_type, msg_text) = Message.receive_msg(self, readable_socket)
+        (msg_type, msg_text) = Message.receive_msg(msg, readable_socket)
 
-        Message.print_message(self, msg_type, msg_text)
+        Message.print_message(msg, msg_type, msg_text)
 
         if msg_type == 0:  # NORMAL
-            Message.ao_normal_msg(msg, msg_text, readable_socket)
+            Server.ao_normal_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 1:  # JOIN
-            Message.ao_join_msg(msg, msg_text, readable_socket)
+            Server.ao_join_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 2:  # USER
-            Message.ao_user_msg(msg, msg_text, readable_socket)
+            Server.ao_user_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 3:  # PASS
-            Message.ao_pass_msg(msg, msg_text, readable_socket)
+            Server.ao_pass_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 4:  # DIRECT
-            Message.ao_direct_msg(msg, msg_text, readable_socket)
+            Server.ao_direct_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 5:  # COMMAND
-            Message.ao_command_msg(msg, msg_text, readable_socket)
+            #Server.ao_command_msg(self, msg_text, readable_socket)
+            Message.print_message(msg, msg_text, readable_socket)
+            Message.unpack_double_packed_message(msg, msg_text, readable_socket)
             pass
 
         if msg_type == 6:  # SERVER
-            Message.ao_server_msg(msg, msg_text, readable_socket)
+            Server.ao_server_msg(self, msg_text, readable_socket)
             pass
 
     def raw_receive(self, sock, length):
@@ -133,6 +135,91 @@ class Server:
                         print(e)
                     continue
 
+    def ao_normal_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_normal_msg"
+            if this message is a normal message, send it to all clients.
+            this includes the client that sent it in the first place."""
+
+        for client_socket in Server.client_sockets:
+            # if client_socket is not readable_socket:
+            Message.send_msg(self, 6, msg_text, client_socket)
+        return
+
+    def ao_join_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_join_msg" """
+
+        return
+
+    def ao_user_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_user_msg" """
+
+        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
+
+        for value in values:
+            if type(value[0]) == str:
+
+                Server.user_logins[value[0]] = datetime.now()
+                # msg.send_msg(6, "Username OK", readable_socket)
+                return True, "Username OK"
+            else:
+                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+
+        return False, "Username not found"
+
+    def ao_pass_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_pass_msg" """
+        returned_screenname = d.select_screenname_if_passhash_matches(msg_text)
+
+        for value in returned_screenname:
+            if type(value[0]) == str:
+
+                if ('{0}'.format(value[0])) in Server.user_logins.keys():
+                    msg.send_msg(6, "Login Successful.", readable_socket)
+                    del Server.user_logins[value[0]]
+
+                    return True, "Password OK"
+            else:
+                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+        else:
+            msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+
+        return False, "Login Unsuccessful."
+
+    def ao_direct_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_direct_msg" """
+
+        return
+
+    def ao_command_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_command_msg" """
+
+        details = msg_text.split()
+        user_info = []
+
+        returned_screenname = d.select_from_table_where("ScreenName", "Users", "ScreenName", details[2])
+
+        if bool(returned_screenname) is False:
+            d.create_new_user(details[0], details[1], details[2], details[3])
+            msg.send_msg(6, "Account successfully registered.", readable_socket)
+
+        elif returned_screenname[0][0] == details[2]:
+            msg.send_msg(6, "Username already in use.", readable_socket)
+
+        return
+
+    def ao_server_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_server_msg" """
+
+        return
+
+
 
 class Message:
     TYPES = ["NORMAL",  # 0
@@ -142,6 +229,17 @@ class Message:
              "DIRECT",  # 4
              "COMMAND",  # 5
              "SERVER"]  # 6
+
+    COMMAND_TYPES = ["CREATE_NEW_USER",             #0
+                     "VIEW_AVAILABLE_CHATROOMS",    #1
+                     "CREATE_NEW_CHATROOM",         #2
+                     "VIEW_FRIENDS",                #3
+                     "ADD_FRIEND",                  #4
+                     "REMOVE_FRIEND",               #5
+                     "UPTIME",                      #6
+                     "TOTAL_USERS",                 #7
+                     "TOTAL_CHATROOMS"]             #8
+
 
     # TYPES = {"NORMAL": 0,  # 0
     #          "JOIN": 1,  # 1
@@ -186,99 +284,33 @@ class Message:
 
         print(Message.TYPES[msg_type], len(msg_text), msg_text)
 
-    def ao_normal_msg(self, msg_text, readable_socket):
 
-        """Function called "ActionsOn_normal_msg"
-            if this message is a normal message, send it to all clients.
-            this includes the client that sent it in the first place."""
+    def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
 
-        for client_socket in Server.client_sockets:
-            # if client_socket is not readable_socket:
-            Message.send_msg(self, 6, msg_text, client_socket)
-        return
+        """."""
 
-    def ao_join_msg(self, msg_text, readable_socket):
+        inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
+            msg_text.strip().encode("utf-8"))  # cut off a newline
 
-        """Function called "ActionsOn_join_msg" """
+        outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
+            inner_msg.strip())  # cut off a newline
+        Server.raw_send(self, sock, len(outer_msg), outer_msg)
 
-        return
+    def unpack_double_packed_message(self, sock, packed_message):
 
+        """This function waits for a message on a socket and returns the message type and text."""
 
+        #header = Server.raw_receive(self, sock, Message.HEADER_LENGTH)
+        header = packed_message
+        print(packed_message, type(packed_message))
 
-    def ao_user_msg(self, msg_text, readable_socket):
-
-        """Function called "ActionsOn_user_msg" """
-
-        values = d.select_from_table_where("ScreenName", "Users", "ScreenName", msg_text)
-
-        for value in values:
-            if type(value[0]) == str:
-
-                Server.user_logins[value[0]] = datetime.now()
-                # msg.send_msg(6, "Username OK", readable_socket)
-                return True, "Username OK"
-            else:
-                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
-
-        return False, "Username not found"
+        (msg_type, msg_length) = struct.unpack('!LL', header)
 
 
 
-    def ao_pass_msg(self, msg_text, readable_socket):
+        #msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
+        return msg_type, msg_text
 
-        """Function called "ActionsOn_pass_msg" """
-        returned_screenname = d.select_screenname_if_passhash_matches(msg_text)
-
-        for value in returned_screenname:
-            if type(value[0]) == str:
-
-                if ('{0}'.format(value[0])) in Server.user_logins.keys():
-                    msg.send_msg(6, "Login Successful.", readable_socket)
-                    del Server.user_logins[value[0]]
-
-                    return True, "Password OK"
-            else:
-                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
-        else:
-            msg.send_msg(6, "Login Unsuccessful.", readable_socket)
-
-        return False, "Login Unsuccessful."
-
-
-    def ao_direct_msg(self, msg_text, readable_socket):
-
-        """Function called "ActionsOn_direct_msg" """
-
-        return
-
-    def ao_command_msg(self, msg_text, readable_socket):
-
-        """Function called "ActionsOn_command_msg" """
-
-        details = msg_text.split()
-        user_info = []
-        print(details, type(details))
-
-        returned_screenname = d.select_from_table_where("ScreenName", "Users", "ScreenName", details[2])
-        print(1)
-
-        if bool(returned_screenname) is False:
-            d.create_new_user(details[0], details[1], details[2], details[3])
-            msg.send_msg(6, "Account successfully registered.", readable_socket)
-
-
-
-        elif returned_screenname[0][0] == details[2]:
-            msg.send_msg(6, "Username already in use.", readable_socket)
-            print("sname in use")
-
-        return
-
-    def ao_server_msg(self, msg_text, readable_socket):
-
-        """Function called "ActionsOn_server_msg" """
-
-        return
 
 
 d = Database()
