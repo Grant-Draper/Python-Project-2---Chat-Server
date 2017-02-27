@@ -24,7 +24,7 @@ class Database:
     # connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
     #                               "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
     connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
-                                  "Database=Test3;""uid=DatabaseAdmin;pwd=Password01")
+                                  "Database=Test4;""uid=DatabaseAdmin;pwd=Password01")
     cursor = connection.cursor()
 
     def execute_sqlcode(self, sqlcode):
@@ -140,12 +140,14 @@ class Database:
         """"""
 
         sqlcode = "insert into dbo.Users (FirstName, LastName, ScreenName) values ('{0}', '{1}', '{2}') insert into dbo.Passwords([HashedPassword], [CurrentPassword], [User_ID]) values ('{3}', 1, SCOPE_IDENTITY())".format(fname, lname, sname, pass_hash)
-        print(sqlcode)
+        Database.execute_sqlcode(self, sqlcode)
+
+        return
 
 
 #d = Database()
 
-Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)
+# Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)
 
 
 
@@ -163,5 +165,5 @@ Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)
 
 # print(d.select_from_table("ScreenName", "Users"))
 
-# print(d.select_from_table_where("ScreenName", "Users", "User_ID", "1"))
+#print(d.select_from_table_where("ScreenName", "Users", "User_ID", "98459"))
 # print(d.select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))

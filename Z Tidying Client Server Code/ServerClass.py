@@ -255,6 +255,23 @@ class Message:
 
         """Function called "ActionsOn_command_msg" """
 
+        details = msg_text.split()
+        user_info = []
+        print(details, type(details))
+
+        returned_screenname = d.select_from_table_where("ScreenName", "Users", "ScreenName", details[2])
+        print(1)
+
+        if bool(returned_screenname) is False:
+            d.create_new_user(details[0], details[1], details[2], details[3])
+            msg.send_msg(6, "Account successfully registered.", readable_socket)
+
+
+
+        elif returned_screenname[0][0] == details[2]:
+            msg.send_msg(6, "Username already in use.", readable_socket)
+            print("sname in use")
+
         return
 
     def ao_server_msg(self, msg_text, readable_socket):
