@@ -311,7 +311,7 @@ class Message:
         #msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
         return msg_type, msg_text
 
-
+test
 
 d = Database()
 msg = Message()
