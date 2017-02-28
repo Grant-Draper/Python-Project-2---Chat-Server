@@ -22,7 +22,7 @@ class Client:
 
     MAIN_MENU = ["1:    Chatrooms",
                  "2:    Friends",
-                 "3:    Server Information",
+                 "3:    Server Information \n",
                  "4:    Log Out"]
 
     CHATROOM_MENU = ["1:    View Available Chatrooms",
@@ -520,7 +520,7 @@ class Message:
         print((next(iter({k for k, v in Message.TYPES.items() if v == msg_type}))), len(msg_text), msg_text)
 
     def send_static_msg(self, msg_type, msg_text, sock):
-        """This function sends a message to a socket."""
+        """."""
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
@@ -528,5 +528,23 @@ class Message:
         Client.raw_send(self, sock, len(full_msg), full_msg)
 
 
+    def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
+
+        """."""
+
+        inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
+            msg_text.strip().encode("utf-8"))  # cut off a newline
+
+        outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
+            inner_msg.strip())  # cut off a newline
+
+        Client.raw_send(self, sock, len(outer_msg), outer_msg)
+        Client.partially_listening(c1)
+
+
 msg = Message()
 
+"""
+c1 = Client("192.168.1.201", 30000)
+msg.double_packed_message(5, 1, "View all rooms", (c1.sockets[-1]))
+"""
