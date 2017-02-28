@@ -144,13 +144,62 @@ class Database:
 
         return
 
+    def create_new_chatroom(self, room_name, description, room_type):
 
-#d = Database()
+        """"""
+
+        if room_type == "Private":
+            room_type = 1
+        elif room_type == "Public":
+            room_type = 2
+
+        sqlcode = "insert into dbo.ChatRooms (RoomName, Description, RoomType_ID) values ('{0}', '{1}', '{2}')".format(
+            room_name, description, room_type)
+
+        Database.execute_sqlcode(self, sqlcode)
+
+        return
+
+    def add_user_to_chatroom(self, uname, room_name, ):
+
+        """"""
+
+        sqlcode1 = "select User_ID from Users where ScreenName = '{0}'".format(uname)
+        user_id = Database.fetch_data(self, sqlcode1)
+        print(sqlcode1)
+
+
+        sqlcode2 = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
+        room_id = Database.fetch_data(self, sqlcode2)
+        print(sqlcode2)
+
+        if bool(room_id) is False:
+            print("chatroom does not exist")
+
+        else:
+            sqlcode = " ScreenName from Users inner join Passwords on Users.User_ID=Passwords.User_ID where Passwords.HashedPassword='{0}' and Passwords.CurrentPassword=1".format(
+                pswd)
+
+
+
+            #sqlcode = "insert into dbo.ChatRooms (RoomName, Description, RoomType_ID) values ('{0}', '{1}', '{2}')".format(
+         #   room_name, description, room_type)
+
+        #Database.execute_sqlcode(self, sqlcode)
+
+        return
+
+
+
+d = Database()
+
+
+d.add_user_to_chatroom("gdawg", "thisisroomy")
 
 # Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)
 
 
-
+#d.create_new_chatroom("thisisroomy", "quite spacious", "Public")
 
 
 #print(d.select_screenname_if_passhash_matches("nofear"))

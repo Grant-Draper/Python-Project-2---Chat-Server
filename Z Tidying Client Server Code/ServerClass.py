@@ -69,13 +69,15 @@ class Server:
             pass
 
         if msg_type == 5:  # COMMAND
-            #Server.ao_command_msg(self, msg_text, readable_socket)
-            Message.print_message(msg, msg_text, readable_socket)
-            Message.unpack_double_packed_message(msg, msg_text, readable_socket)
+            Server.ao_command_msg(self, msg_text, readable_socket)
             pass
 
         if msg_type == 6:  # SERVER
             Server.ao_server_msg(self, msg_text, readable_socket)
+            pass
+
+        if msg_type == 7:  # TEMP
+            Server.ao_temp_msg(self, msg_text, readable_socket)
             pass
 
     def raw_receive(self, sock, length):
@@ -219,6 +221,13 @@ class Server:
 
         return
 
+    def ao_temp_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_temp_msg" """
+
+
+
+        return
 
 
 class Message:
@@ -284,34 +293,34 @@ class Message:
 
         print(Message.TYPES[msg_type], len(msg_text), msg_text)
 
+# """
+#     def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
+#
+#         """."""
+#
+#         inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
+#             msg_text.strip().encode("utf-8"))  # cut off a newline
+#
+#         outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
+#             inner_msg.strip())  # cut off a newline
+#         Server.raw_send(self, sock, len(outer_msg), outer_msg)
+#
+#     def unpack_double_packed_message(self, sock, packed_message):
+#
+#         """This function waits for a message on a socket and returns the message type and text."""
+#
+#         #header = Server.raw_receive(self, sock, Message.HEADER_LENGTH)
+#         header = packed_message
+#         print(packed_message, type(packed_message))
+#
+#         (msg_type, msg_length) = struct.unpack('!LL', header)
+#
+#
+#
+#         #msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
+#         return msg_type, msg_text
+# """
 
-    def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
-
-        """."""
-
-        inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
-            msg_text.strip().encode("utf-8"))  # cut off a newline
-
-        outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
-            inner_msg.strip())  # cut off a newline
-        Server.raw_send(self, sock, len(outer_msg), outer_msg)
-
-    def unpack_double_packed_message(self, sock, packed_message):
-
-        """This function waits for a message on a socket and returns the message type and text."""
-
-        #header = Server.raw_receive(self, sock, Message.HEADER_LENGTH)
-        header = packed_message
-        print(packed_message, type(packed_message))
-
-        (msg_type, msg_length) = struct.unpack('!LL', header)
-
-
-
-        #msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
-        return msg_type, msg_text
-
-test
 
 d = Database()
 msg = Message()
