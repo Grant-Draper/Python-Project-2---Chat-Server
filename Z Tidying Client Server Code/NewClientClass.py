@@ -4,7 +4,8 @@ import ssl
 import sys
 import struct
 import hashlib
-
+import re
+import getpass
 
 # Message format is:
 #   4 bytes unsigned type
@@ -365,7 +366,7 @@ class Client:
                     break
 
                 elif msg_type == 6:  # SERVER
-                    Client.ao_server_msg(self, msg_text)
+                    Client.ao_server_msg(self, msg_text, msg_type)
 
                     # Message.print_message(self, msg_type, msg_text)
                     # Client.partially_listening(self)
@@ -436,7 +437,7 @@ class Client:
 
         return
 
-    def ao_server_msg(self, msg_text):
+    def ao_server_msg(self, msg_text, msg_type):
 
         """Function called "ActionsOn_server_msg" """
 
@@ -448,6 +449,7 @@ class Client:
 
         elif msg_text == "Login Unsuccessful.":
             print("no login")
+            Client.initial_options(self)
 
         elif msg_text == "Username already in use.":
             print("Username already in use, please try again.")
@@ -456,6 +458,9 @@ class Client:
         elif msg_text == "Account successfully registered.":
             print("Account Successfully registered.")
             Client.initial_options(self)
+
+        elif msg_type == (re.search([6][1], str(msg_type))):
+            #print("confirmed")
 
 
 """
@@ -527,10 +532,10 @@ class Message:
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
 
-
+"""
     def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
 
-        """."""
+
 
         inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
@@ -541,10 +546,7 @@ class Message:
         Client.raw_send(self, sock, len(outer_msg), outer_msg)
         Client.partially_listening(c1)
 
-
+"""
 msg = Message()
-
-"""
-c1 = Client("192.168.1.201", 30000)
-msg.double_packed_message(5, 1, "View all rooms", (c1.sockets[-1]))
-"""
+#c1 = Client("192.168.1.201", 30000)
+#msg.double_packed_message(5, 1, "View all rooms", (c1.sockets[-1]))
