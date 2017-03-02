@@ -486,7 +486,7 @@ class Client:
 
         elif msg_type[0] == 6 and msg_type[1] == 1:
             print("confirmed")
-
+###
 
 """
 class Chatroom:
