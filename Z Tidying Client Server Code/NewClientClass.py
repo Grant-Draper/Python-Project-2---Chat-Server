@@ -216,6 +216,7 @@ class Client:
         if selection == 1:  # View Chatrooms
             pass
         if selection == 2:  # Join a chatroom
+            Client.join_chatroom(self)
             pass
         if selection == 3:  # Create a chatroom
             pass
@@ -269,12 +270,32 @@ class Client:
             Client.main_menu(self, Client.current_user)
             pass
 
+    def join_chatroom(self):
+
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Join Chatroom", "\n")
+
+        while True:
+            print("Please type the chatroom name:")
+            chatroom = input()
+            if len(chatroom) == 0:
+                print("Chatroom invalid")
+                pass
+
+            elif len(chatroom) <= 20 and chatroom.isalnum():
+                msg.send_static_msg(Message.TYPES["JOIN"], chatroom, Client.sockets[-1])
+                Client.partially_listening(self)
+                return
+
+
     def option_input_valid(self, list):
 
         while True:
             selection = Client.input_only_int(self)
             if (selection - 1) in range(0, len(list)):
                 return selection
+
 
     def input_only_int(self):
 
@@ -459,27 +480,31 @@ class Client:
             print("Account Successfully registered.")
             Client.initial_options(self)
 
-        elif msg_type == (re.search([6][1], str(msg_type))):
-            #print("confirmed")
+        elif msg_text == "Chatroom does not exist.":
+            print("Chatroom does not exist.")
+            Client.initial_options(self)
+
+        elif msg_type[0] == 6 and msg_type[1] == 1:
+            print("confirmed")
 
 
 """
- class Chatroom:
+class Chatroom:
 
 
-     def __init__(self, name):
+ def __init__(self, name):
 
-         self.members = {}
-         self.name = name
-         pass
+     self.members = {}
+     self.name = name
+     pass
 
-     def member_join(self, member, member_socket):
-         self.members[member] = member_socket
-         pass
+ def member_join(self, member, member_socket):
+     self.members[member] = member_socket
+     pass
 
-     def member_leave(self, member):
-         del self.members[member]
-         pass
+ def member_leave(self, member):
+     del self.members[member]
+     pass
 
 """
 

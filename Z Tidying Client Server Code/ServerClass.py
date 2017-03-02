@@ -13,6 +13,7 @@ from DatabaseClass import *
 class Server:
     client_sockets = []
     user_logins = {}
+    user_socket_pairs = {}
 
     def __init__(self, HOST, PORT):
 
@@ -152,7 +153,18 @@ class Server:
 
         """Function called "ActionsOn_join_msg" """
 
+        uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+        print(uname)
+
+        value = d.add_user_to_chatroom(uname, msg_text)
+
+        if value[0]:
+            print(value[0], 1)
+        else:
+            print(value[0], 2)
+
         return
+
 
     def ao_user_msg(self, msg_text, readable_socket):
 
@@ -174,13 +186,18 @@ class Server:
     def ao_pass_msg(self, msg_text, readable_socket):
 
         """Function called "ActionsOn_pass_msg" """
+
         returned_screenname = d.select_screenname_if_passhash_matches(msg_text)
 
         for value in returned_screenname:
             if type(value[0]) == str:
 
                 if ('{0}'.format(value[0])) in Server.user_logins.keys():
+
                     msg.send_msg(6, "Login Successful.", readable_socket)
+                    Server.user_socket_pairs[('{0}'.format(value[0]))] = readable_socket
+                    #print(Server.user_socket_pairs)
+
                     del Server.user_logins[value[0]]
 
                     return True, "Password OK"
@@ -224,6 +241,7 @@ class Server:
     def ao_temp_msg(self, msg_text, readable_socket):
 
         """Function called "ActionsOn_temp_msg" """
+
 
 
 
