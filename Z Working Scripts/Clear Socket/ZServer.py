@@ -31,8 +31,8 @@ def receive_and_broadcast_message(readable_socket, client_sockets):
 
 
 # our address (we are the server)
-#server_ip_address = '192.168.1.201'
-server_ip_address = "127.0.0.1"
+server_ip_address = '192.168.1.201'
+#server_ip_address = "127.0.0.1"
 
 server_port = 5000
 
