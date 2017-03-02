@@ -16,7 +16,7 @@ import getpass
 class Client:
     server_details = []
     sockets = []
-    current_user = None
+    current_user = "grant" #None
 
     INITIAL_OPTIONS = ["1:     Log In",
                        "2:     Create New Account"]
@@ -319,6 +319,11 @@ class Client:
                 # 7. if sys.stdin is available to read, read from it and send the message
                 if sys.stdin in available_streams:
                     msg_text = sys.stdin.readline()
+
+                    if msg_text == "!QuiT!\n":
+                        Client.main_menu(self, Client.current_user)
+                        Message.send_msg(self, Message.TYPES["COMMAND"], msg_text, self.ssl_socket)
+
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
                     continue
 
@@ -356,37 +361,39 @@ class Client:
 
                 msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
 
-                if msg_type == 0:  # NORMAL
+                msg_type = str(msg_type)
+
+                if msg_type[0] == "0":  # NORMAL
                     Client.ao_normal_msg(self, msg_text)
 
                     # Message.print_message(self, msg_type, msg_text)
                     # print(msg_type, msg_text)
                     break
 
-                elif msg_type == 1:  # JOIN
+                elif msg_type[0] == "1":  # JOIN
                     Client.ao_join_msg(self, msg_text)
                     break
 
-                elif msg_type == 2:  # USER
+                elif msg_type[0] == "2":  # USER
                     Client.ao_user_msg(self, msg_text)
 
                     # Message.print_message(self, msg_type, msg_text)
                     # print(msg_type, msg_text)
                     break
 
-                elif msg_type == 3:  # PASS
+                elif msg_type[0] == "3":  # PASS
                     Client.ao_pass_msg(self, msg_text)
                     break
 
-                elif msg_type == 4:  # DIRECT
+                elif msg_type[0] == "4":  # DIRECT
                     Client.ao_direct_msg(self, msg_text)
                     break
 
-                elif msg_type == 5:  # COMMAND
+                elif msg_type[0] == "5":  # COMMAND
                     Client.ao_command_msg(self, msg_text)
                     break
 
-                elif msg_type == 6:  # SERVER
+                elif msg_type[0] == "6":  # SERVER
                     Client.ao_server_msg(self, msg_text, msg_type)
 
                     # Message.print_message(self, msg_type, msg_text)
@@ -462,51 +469,34 @@ class Client:
 
         """Function called "ActionsOn_server_msg" """
 
+        msg_type = str(msg_type)
+
         print(Message.print_message(msg, 6, msg_text))
 
-        if msg_text == "Login Successful.":
+        if msg_type[0] == "6" and msg_type[1] == "1": # "Login Successful."
             print("login ok")
             Client.main_menu(self, Client.current_user)
 
-        elif msg_text == "Login Unsuccessful.":
+        elif msg_type[0] == "6" and msg_type[1] == "2": # "Login Unsuccessful.":
             print("no login")
             Client.initial_options(self)
 
-        elif msg_text == "Username already in use.":
+        elif msg_type[0] == "6" and msg_type[1] == "3": # "Username already in use.":
             print("Username already in use, please try again.")
             Client.create_new_user(self)
 
-        elif msg_text == "Account successfully registered.":
+        elif msg_type[0] == "6" and msg_type[1] == "4": # "Account successfully registered.":
             print("Account Successfully registered.")
             Client.initial_options(self)
 
-        elif msg_text == "Chatroom does not exist.":
+        elif msg_type[0] == "6" and msg_type[1] == "5": # "Chatroom does not exist.":
             print("Chatroom does not exist.")
-            Client.initial_options(self)
+            Client.chatroom_menu(self)
 
-        elif msg_type[0] == 6 and msg_type[1] == 1:
-            print("confirmed")
-###
+        elif msg_type[0] == "6" and msg_type[1] == "6": # "Joined the Chatroom.":
+            print("Sucessfully joined chatroom.")
+            Client.listening(self)
 
-"""
-class Chatroom:
-
-
- def __init__(self, name):
-
-     self.members = {}
-     self.name = name
-     pass
-
- def member_join(self, member, member_socket):
-     self.members[member] = member_socket
-     pass
-
- def member_leave(self, member):
-     del self.members[member]
-     pass
-
-"""
 
 
 class Message:
@@ -557,21 +547,5 @@ class Message:
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
 
-"""
-    def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
-
-
-
-        inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
-            msg_text.strip().encode("utf-8"))  # cut off a newline
-
-        outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
-            inner_msg.strip())  # cut off a newline
-
-        Client.raw_send(self, sock, len(outer_msg), outer_msg)
-        Client.partially_listening(c1)
-
-"""
 msg = Message()
-#c1 = Client("192.168.1.201", 30000)
-#msg.double_packed_message(5, 1, "View all rooms", (c1.sockets[-1]))
+

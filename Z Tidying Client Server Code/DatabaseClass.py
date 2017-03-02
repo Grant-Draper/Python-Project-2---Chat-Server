@@ -157,7 +157,6 @@ class Database:
             room_name, description, room_type)
 
         Database.execute_sqlcode(self, sqlcode)
-
         return
 
     def add_user_to_chatroom(self, uname, room_name):
@@ -180,6 +179,15 @@ class Database:
             Database.execute_sqlcode(self, sqlcode)
             return True, "User added to chatroom."
 
+    def is_user_in_chatroom(self, uname, room_name):
+
+        sqlcode1 = "select User_ID from Users where ScreenName = '{0}'".format(uname)
+        user_id = Database.fetch_data(self, sqlcode1)
+
+        sqlcode2 = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
+        room_id = Database.fetch_data(self, sqlcode2)
+
+        sqlcode = "see desktop server vm"
 
 #####
 """
@@ -188,6 +196,8 @@ dict = {"key":"value", "key2":"value2", "key3":"value3"}
 
 print((next(iter({k for k, v in dict.items() if v == value}))))
 """
+
+
 
 
 
