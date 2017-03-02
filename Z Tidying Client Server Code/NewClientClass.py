@@ -4,7 +4,8 @@ import ssl
 import sys
 import struct
 import hashlib
-
+import re
+import getpass
 
 # Message format is:
 #   4 bytes unsigned type
@@ -22,7 +23,7 @@ class Client:
 
     MAIN_MENU = ["1:    Chatrooms",
                  "2:    Friends",
-                 "3:    Server Information",
+                 "3:    Server Information \n",
                  "4:    Log Out"]
 
     CHATROOM_MENU = ["1:    View Available Chatrooms",
@@ -215,6 +216,7 @@ class Client:
         if selection == 1:  # View Chatrooms
             pass
         if selection == 2:  # Join a chatroom
+            Client.join_chatroom(self)
             pass
         if selection == 3:  # Create a chatroom
             pass
@@ -268,12 +270,32 @@ class Client:
             Client.main_menu(self, Client.current_user)
             pass
 
+    def join_chatroom(self):
+
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Join Chatroom", "\n")
+
+        while True:
+            print("Please type the chatroom name:")
+            chatroom = input()
+            if len(chatroom) == 0:
+                print("Chatroom invalid")
+                pass
+
+            elif len(chatroom) <= 20 and chatroom.isalnum():
+                msg.send_static_msg(Message.TYPES["JOIN"], chatroom, Client.sockets[-1])
+                Client.partially_listening(self)
+                return
+
+
     def option_input_valid(self, list):
 
         while True:
             selection = Client.input_only_int(self)
             if (selection - 1) in range(0, len(list)):
                 return selection
+
 
     def input_only_int(self):
 
@@ -365,7 +387,7 @@ class Client:
                     break
 
                 elif msg_type == 6:  # SERVER
-                    Client.ao_server_msg(self, msg_text)
+                    Client.ao_server_msg(self, msg_text, msg_type)
 
                     # Message.print_message(self, msg_type, msg_text)
                     # Client.partially_listening(self)
@@ -436,7 +458,7 @@ class Client:
 
         return
 
-    def ao_server_msg(self, msg_text):
+    def ao_server_msg(self, msg_text, msg_type):
 
         """Function called "ActionsOn_server_msg" """
 
@@ -448,6 +470,7 @@ class Client:
 
         elif msg_text == "Login Unsuccessful.":
             print("no login")
+            Client.initial_options(self)
 
         elif msg_text == "Username already in use.":
             print("Username already in use, please try again.")
@@ -457,24 +480,31 @@ class Client:
             print("Account Successfully registered.")
             Client.initial_options(self)
 
+        elif msg_text == "Chatroom does not exist.":
+            print("Chatroom does not exist.")
+            Client.initial_options(self)
+
+        elif msg_type[0] == 6 and msg_type[1] == 1:
+            print("confirmed")
+
 
 """
- class Chatroom:
+class Chatroom:
 
 
-     def __init__(self, name):
+ def __init__(self, name):
 
-         self.members = {}
-         self.name = name
-         pass
+     self.members = {}
+     self.name = name
+     pass
 
-     def member_join(self, member, member_socket):
-         self.members[member] = member_socket
-         pass
+ def member_join(self, member, member_socket):
+     self.members[member] = member_socket
+     pass
 
-     def member_leave(self, member):
-         del self.members[member]
-         pass
+ def member_leave(self, member):
+     del self.members[member]
+     pass
 
 """
 
@@ -520,13 +550,28 @@ class Message:
         print((next(iter({k for k, v in Message.TYPES.items() if v == msg_type}))), len(msg_text), msg_text)
 
     def send_static_msg(self, msg_type, msg_text, sock):
-        """This function sends a message to a socket."""
+        """."""
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
 
+"""
+    def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
 
+
+
+        inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
+            msg_text.strip().encode("utf-8"))  # cut off a newline
+
+        outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
+            inner_msg.strip())  # cut off a newline
+
+        Client.raw_send(self, sock, len(outer_msg), outer_msg)
+        Client.partially_listening(c1)
+
+"""
 msg = Message()
-
+#c1 = Client("192.168.1.201", 30000)
+#msg.double_packed_message(5, 1, "View all rooms", (c1.sockets[-1]))
