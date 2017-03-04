@@ -126,9 +126,7 @@ class Server:
             for readable_socket in readable_sockets:
 
                 if readable_socket == self.master_socket:
-
                     Server.accept_new_client_connection(self)
-
                     continue
 
                 else:
@@ -143,11 +141,28 @@ class Server:
         """Function called "ActionsOn_normal_msg"
             if this message is a normal message, send it to all clients.
             this includes the client that sent it in the first place."""
-
+        """
         for client_socket in Server.client_sockets:
             # if client_socket is not readable_socket:
             Message.send_msg(self, 6, msg_text, client_socket)
         return
+        """
+
+        uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+
+        for key in Server.user_socket_pairs.keys():
+            if key != uname:
+
+                if d.is_user_in_chatroom(key)[1] == d.is_user_in_chatroom(uname)[1]:
+                    Message.send_msg(self, 0, "{0}: {1}".format(uname, msg_text), (next(iter(
+                        {v for k, v in Server.user_socket_pairs.items() if k == key}))))
+            else:
+                print("originator")
+
+
+
+
+
 
     def ao_join_msg(self, msg_text, readable_socket):
 
@@ -155,17 +170,14 @@ class Server:
 
         uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
 
-        check = d.is_user_in_chatroom(uname, msg_text)
+        check = d.is_user_in_chatroom(uname)
 
-        if check is False:
-
+        if check[0] is False:
             value = d.add_user_to_chatroom(uname, msg_text)
 
             if value[0]:
-                print(value[0], 1)
                 Message.send_msg(self, 66, msg_text, readable_socket)
             else:
-                print(value[0], 2)
                 Message.send_msg(self, 65, msg_text, readable_socket)
         else:
             Message.send_msg(self, 67, msg_text, readable_socket)
@@ -185,7 +197,7 @@ class Server:
                 # msg.send_msg(6, "Username OK", readable_socket)
                 return True, "Username OK"
             else:
-                msg.send_msg(62, "Login Unsuccessful.", readable_socket)
+                msg.send_msg(63, "Login Unsuccessful.", readable_socket)
 
         return False, "Username not found"
 
@@ -224,10 +236,10 @@ class Server:
 
         """Function called "ActionsOn_command_msg" """
 
-        uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
         msg_type = str(msg_type)
 
         if msg_text[0] == "!":
+            uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
             parts = msg_text.split()
 
             if d.remove_user_from_chatroom(uname, parts[1]):
@@ -235,8 +247,6 @@ class Server:
 
         elif msg_type[0] == "5": # and msg_type[1] == "1":
             Server.client_registration(self, msg_text, readable_socket)
-
-
         return
 
 
@@ -263,7 +273,7 @@ class Server:
             d.create_new_user(details[0], details[1], details[2], details[3])
             msg.send_msg(64, "Account successfully registered.", readable_socket)
 
-        elif returned_screenname[0][0] == details[2]:
+        else: #returned_screenname[0][0] == details[2]:
             msg.send_msg(63, "Username already in use.", readable_socket)
         return
 

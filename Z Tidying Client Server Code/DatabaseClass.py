@@ -159,6 +159,18 @@ class Database:
         Database.execute_sqlcode(self, sqlcode)
         return
 
+    def retrieve_user_id_from_uname(self, uname):
+
+        sqlcode = "select User_ID from Users where ScreenName = '{0}'".format(uname)
+        user_id = Database.fetch_data(self, sqlcode)
+        return user_id[0][0]
+
+    def retrieve_room_id_from_room_name(self, room_name):
+
+        sqlcode = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
+        room_id = Database.fetch_data(self, sqlcode)
+        return room_id[0][0]
+
     def add_user_to_chatroom(self, uname, room_name):
 
         """"""
@@ -174,7 +186,7 @@ class Database:
             sqlcode = "insert into dbo.ChatRooms_Users (Room_ID, User_ID) values ('{0}', '{1}')".format(room_id, user_id)
             Database.execute_sqlcode(self, sqlcode)
             return True, "User added to Chatroom."
-
+    """
     def is_user_in_chatroom(self, uname, room_name):
 
         user_id = Database.retrieve_user_id_from_uname(self, uname)
@@ -187,6 +199,18 @@ class Database:
             return True
         else:
             return False
+    """
+    def is_user_in_chatroom(self, uname):
+
+        user_id = Database.retrieve_user_id_from_uname(self, uname)
+
+        sqlcode = "select Room_ID from Chatrooms_Users where User_id = '{0}'".format(user_id)
+        room_id = Database.fetch_data(self, sqlcode)
+
+        if room_id:
+            return True, room_id
+        else:
+            return False, "False"
 
 
     def remove_user_from_chatroom(self, uname, room_name):
@@ -200,29 +224,16 @@ class Database:
         if bool(chatroom_user_id):
             sqlcode = "delete from Chatrooms_Users where Room_User_ID = '{0}'".format(chatroom_user_id)
             Database.execute_sqlcode(self, sqlcode)
+            print("True")
             return True, "User removed from Chatroom."
 
         else:
+            print("False")
             return False, "Unable to remove user, user not in Chatroom."
 
 
-    def retrieve_user_id_from_uname(self, uname):
-
-        sqlcode = "select User_ID from Users where ScreenName = '{0}'".format(uname)
-        user_id = Database.fetch_data(self, sqlcode)
-        return user_id[0][0]
-
-    def retrieve_room_id_from_room_name(self, room_name):
-
-        sqlcode = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
-        room_id = Database.fetch_data(self, sqlcode)
-        return room_id[0][0]
 
 
-
-
-
-#####
 """
 value = "value2"
 dict = {"key":"value", "key2":"value2", "key3":"value3"}
