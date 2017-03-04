@@ -155,14 +155,20 @@ class Server:
 
         uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
 
-        value = d.add_user_to_chatroom(uname, msg_text)
+        check = d.is_user_in_chatroom(uname, msg_text)
 
-        if value[0]:
-            print(value[0], 1)
-            Message.send_msg(self, 66, msg_text, readable_socket)
+        if check is False:
+
+            value = d.add_user_to_chatroom(uname, msg_text)
+
+            if value[0]:
+                print(value[0], 1)
+                Message.send_msg(self, 66, msg_text, readable_socket)
+            else:
+                print(value[0], 2)
+                Message.send_msg(self, 65, msg_text, readable_socket)
         else:
-            print(value[0], 2)
-            Message.send_msg(self, 65, msg_text, readable_socket)
+            Message.send_msg(self, 67, msg_text, readable_socket)
         return
 
 
@@ -218,11 +224,21 @@ class Server:
 
         """Function called "ActionsOn_command_msg" """
 
+        uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
         msg_type = str(msg_type)
 
-        if msg_type[0] == "5": # and msg_type[1] == "1":
+        if msg_text[0] == "!":
+            parts = msg_text.split()
+
+            if d.remove_user_from_chatroom(uname, parts[1]):
+                msg.send_msg(68, "User removed from Chatroom.", readable_socket)
+
+        elif msg_type[0] == "5": # and msg_type[1] == "1":
             Server.client_registration(self, msg_text, readable_socket)
+
+
         return
+
 
     def ao_server_msg(self, msg_text, readable_socket):
 

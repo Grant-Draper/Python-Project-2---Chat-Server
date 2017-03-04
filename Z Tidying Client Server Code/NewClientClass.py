@@ -16,7 +16,8 @@ import getpass
 class Client:
     server_details = []
     sockets = []
-    current_user = "grant" #None
+    current_user = None
+    chatroom = None
 
     INITIAL_OPTIONS = ["1:     Log In",
                        "2:     Create New Account"]
@@ -285,6 +286,7 @@ class Client:
 
             elif len(chatroom) <= 20 and chatroom.isalnum():
                 msg.send_static_msg(Message.TYPES["JOIN"], chatroom, Client.sockets[-1])
+                Client.chatroom = chatroom
                 Client.partially_listening(self)
                 return
 
@@ -321,8 +323,8 @@ class Client:
                     msg_text = sys.stdin.readline()
 
                     if msg_text == "!QuiT!\n":
-                        Client.main_menu(self, Client.current_user)
-                        Message.send_msg(self, Message.TYPES["COMMAND"], msg_text, self.ssl_socket)
+                        #Client.main_menu(self, Client.current_user)
+                        Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom, self.ssl_socket)
 
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
                     continue
@@ -497,6 +499,13 @@ class Client:
             print("Sucessfully joined chatroom.")
             Client.listening(self)
 
+        elif msg_type[0] == "6" and msg_type[1] == "7": # "User already in Chatroom.":
+            print("User already in Chatroom.")
+            #Client.listening(self)
+
+        elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
+            print("User exited chatroom Chatroom.")
+            Client.main_menu(self, Client.current_user)
 
 
 class Message:
