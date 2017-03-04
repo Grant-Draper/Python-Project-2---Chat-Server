@@ -130,7 +130,7 @@ class Database:
 
         sqlcode = "select ScreenName from Users inner join Passwords on Users.User_ID=Passwords.User_ID where Passwords.HashedPassword='{0}' and Passwords.CurrentPassword=1".format(pswd)
 
-        user = (Database.fetch_data(self, sqlcode))
+        user = Database.fetch_data(self, sqlcode)
 
         return user
 
@@ -157,31 +157,72 @@ class Database:
             room_name, description, room_type)
 
         Database.execute_sqlcode(self, sqlcode)
-
         return
 
     def add_user_to_chatroom(self, uname, room_name):
 
         """"""
 
-        sqlcode1 = "select User_ID from Users where ScreenName = '{0}'".format(uname)
-        user_id = Database.fetch_data(self, sqlcode1)
-
-        sqlcode2 = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
-        room_id = Database.fetch_data(self, sqlcode2)
+        user_id = Database.retrieve_user_id_from_uname(self, uname)
+        room_id = Database.retrieve_room_id_from_room_name(self, room_name)
 
         if bool(room_id) is False:
             print("Chatroom does not exist.")
-
             return False, "Chatroom does not exist."
 
         else:
-            sqlcode = "insert into dbo.ChatRooms_Users (Room_ID, User_ID) values ('{0}', '{1}')".format(room_id[0][0], user_id[0][0])
+            sqlcode = "insert into dbo.ChatRooms_Users (Room_ID, User_ID) values ('{0}', '{1}')".format(room_id, user_id)
             Database.execute_sqlcode(self, sqlcode)
-            return True, "User added to chatroom."
+            return True, "User added to Chatroom."
+
+    def is_user_in_chatroom(self, uname, room_name):
+
+        user_id = Database.retrieve_user_id_from_uname(self, uname)
+        room_id = Database.retrieve_room_id_from_room_name(self, room_name)
+
+        sqlcode = "select Room_User_ID from Chatrooms_Users where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
+        room_user_id = Database.fetch_data(self, sqlcode)
+
+        if room_user_id:
+            return True
+        else:
+            return False
+
+
+    def remove_user_from_chatroom(self, uname, room_name):
+
+        user_id = Database.retrieve_user_id_from_uname(self, uname)
+        room_id = Database.retrieve_room_id_from_room_name(self, room_name)
+
+        sqlcode = "select Room_User_ID from Chatrooms_Users where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
+        chatroom_user_id = Database.fetch_data(self, sqlcode)[0][0]
+
+        if bool(chatroom_user_id):
+            sqlcode = "delete from Chatrooms_Users where Room_User_ID = '{0}'".format(chatroom_user_id)
+            Database.execute_sqlcode(self, sqlcode)
+            return True, "User removed from Chatroom."
+
+        else:
+            return False, "Unable to remove user, user not in Chatroom."
+
+
+    def retrieve_user_id_from_uname(self, uname):
+
+        sqlcode = "select User_ID from Users where ScreenName = '{0}'".format(uname)
+        user_id = Database.fetch_data(self, sqlcode)
+        return user_id[0][0]
+
+    def retrieve_room_id_from_room_name(self, room_name):
+
+        sqlcode = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
+        room_id = Database.fetch_data(self, sqlcode)
+        return room_id[0][0]
 
 
 
+
+
+#####
 """
 value = "value2"
 dict = {"key":"value", "key2":"value2", "key3":"value3"}
@@ -192,9 +233,14 @@ print((next(iter({k for k, v in dict.items() if v == value}))))
 
 
 
-#d = Database()
 
-
+"""
+d = Database()
+if d.is_user_in_chatroom("gd", "loosygoosy"):
+    print(1)
+else:
+    print(2)
+"""
 #d.add_user_to_chatroom("gdawg", "loosygoosy")
 
 # Database.create_new_user(db, grant, draper, gdawg, siofvsndfcvlsknc)

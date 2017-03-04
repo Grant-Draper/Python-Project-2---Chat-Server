@@ -70,7 +70,7 @@ class Server:
             pass
 
         if msg_type == 5:  # COMMAND
-            Server.ao_command_msg(self, msg_text, readable_socket)
+            Server.ao_command_msg(self, msg_text, readable_socket, msg_type)
             pass
 
         if msg_type == 6:  # SERVER
@@ -154,15 +154,21 @@ class Server:
         """Function called "ActionsOn_join_msg" """
 
         uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
-        print(uname)
 
-        value = d.add_user_to_chatroom(uname, msg_text)
+        check = d.is_user_in_chatroom(uname, msg_text)
 
-        if value[0]:
-            print(value[0], 1)
+        if check is False:
+
+            value = d.add_user_to_chatroom(uname, msg_text)
+
+            if value[0]:
+                print(value[0], 1)
+                Message.send_msg(self, 66, msg_text, readable_socket)
+            else:
+                print(value[0], 2)
+                Message.send_msg(self, 65, msg_text, readable_socket)
         else:
-            print(value[0], 2)
-
+            Message.send_msg(self, 67, msg_text, readable_socket)
         return
 
 
@@ -179,7 +185,7 @@ class Server:
                 # msg.send_msg(6, "Username OK", readable_socket)
                 return True, "Username OK"
             else:
-                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+                msg.send_msg(62, "Login Unsuccessful.", readable_socket)
 
         return False, "Username not found"
 
@@ -194,7 +200,7 @@ class Server:
 
                 if ('{0}'.format(value[0])) in Server.user_logins.keys():
 
-                    msg.send_msg(6, "Login Successful.", readable_socket)
+                    msg.send_msg(61, "Login Successful.", readable_socket)
                     Server.user_socket_pairs[('{0}'.format(value[0]))] = readable_socket
                     #print(Server.user_socket_pairs)
 
@@ -202,9 +208,9 @@ class Server:
 
                     return True, "Password OK"
             else:
-                msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+                msg.send_msg(62, "Login Unsuccessful.", readable_socket)
         else:
-            msg.send_msg(6, "Login Unsuccessful.", readable_socket)
+            msg.send_msg(62, "Login Unsuccessful.", readable_socket)
 
         return False, "Login Unsuccessful."
 
@@ -214,23 +220,25 @@ class Server:
 
         return
 
-    def ao_command_msg(self, msg_text, readable_socket):
+    def ao_command_msg(self, msg_text, readable_socket, msg_type):
 
         """Function called "ActionsOn_command_msg" """
 
-        details = msg_text.split()
-        user_info = []
+        uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+        msg_type = str(msg_type)
 
-        returned_screenname = d.select_from_table_where("ScreenName", "Users", "ScreenName", details[2])
+        if msg_text[0] == "!":
+            parts = msg_text.split()
 
-        if bool(returned_screenname) is False:
-            d.create_new_user(details[0], details[1], details[2], details[3])
-            msg.send_msg(6, "Account successfully registered.", readable_socket)
+            if d.remove_user_from_chatroom(uname, parts[1]):
+                msg.send_msg(68, "User removed from Chatroom.", readable_socket)
 
-        elif returned_screenname[0][0] == details[2]:
-            msg.send_msg(6, "Username already in use.", readable_socket)
+        elif msg_type[0] == "5": # and msg_type[1] == "1":
+            Server.client_registration(self, msg_text, readable_socket)
+
 
         return
+
 
     def ao_server_msg(self, msg_text, readable_socket):
 
@@ -242,10 +250,24 @@ class Server:
 
         """Function called "ActionsOn_temp_msg" """
 
-
-
-
         return
+
+    def client_registration(self, msg_text, readable_socket):
+
+        details = msg_text.split()
+        user_info = []
+
+        returned_screenname = d.select_from_table_where("ScreenName", "Users", "ScreenName", details[2])
+
+        if bool(returned_screenname) is False:
+            d.create_new_user(details[0], details[1], details[2], details[3])
+            msg.send_msg(64, "Account successfully registered.", readable_socket)
+
+        elif returned_screenname[0][0] == details[2]:
+            msg.send_msg(63, "Username already in use.", readable_socket)
+        return
+
+
 
 
 class Message:
@@ -298,6 +320,8 @@ class Message:
         header = Server.raw_receive(self, sock, Message.HEADER_LENGTH)
         (msg_type, msg_length) = struct.unpack('!LL', header)
 
+
+
         try:
             msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
             return msg_type, msg_text
@@ -311,35 +335,6 @@ class Message:
 
         print(Message.TYPES[msg_type], len(msg_text), msg_text)
 
-# """
-#     def double_packed_message(self, msg_type_1, msg_type_2, msg_text, sock):
-#
-#         """."""
-#
-#         inner_msg = struct.pack('!LL', msg_type_2, len(msg_text)) + bytes(
-#             msg_text.strip().encode("utf-8"))  # cut off a newline
-#
-#         outer_msg = struct.pack('!LL', msg_type_1, len(inner_msg)) + bytes(
-#             inner_msg.strip())  # cut off a newline
-#         Server.raw_send(self, sock, len(outer_msg), outer_msg)
-#
-#     def unpack_double_packed_message(self, sock, packed_message):
-#
-#         """This function waits for a message on a socket and returns the message type and text."""
-#
-#         #header = Server.raw_receive(self, sock, Message.HEADER_LENGTH)
-#         header = packed_message
-#         print(packed_message, type(packed_message))
-#
-#         (msg_type, msg_length) = struct.unpack('!LL', header)
-#
-#
-#
-#         #msg_text = Server.raw_receive(self, sock, msg_length).decode("utf-8")
-#         return msg_type, msg_text
-# """
-
 
 d = Database()
 msg = Message()
-
