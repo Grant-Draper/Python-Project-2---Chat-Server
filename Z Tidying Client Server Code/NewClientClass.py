@@ -1,11 +1,23 @@
+
+"""**********************************************************
+        Grant Draper SFC5 - Chat Server (Client)
+                Script Pre-Requisites
+
+            ****** Must be ran on Linux ******
+
+                Python 3.6 Interpreter
+                Modules: pypyodbc 1.3.4
+**********************************************************"""
+
+
 import socket
 import select
 import ssl
 import sys
 import struct
 import hashlib
-import re
 import getpass
+from datetime import datetime
 
 # Message format is:
 #   4 bytes unsigned type
@@ -51,7 +63,6 @@ class Client:
             self.ssl_socket.connect((HOST, PORT))
             Client.sockets.append(self.ssl_socket)
             Client.server_details += HOST, PORT
-
         except Exception as e:
             print(e)
             print("Completed with Exception1.", "\n")
@@ -157,7 +168,7 @@ class Client:
 
         while True:
             print("Please enter password:")
-            pswd = input()
+            pswd = getpass.getpass()
             pswd = str(pswd)
             if len(pswd) <= 7:
                 print("Password invalid")
@@ -215,6 +226,7 @@ class Client:
         selection = Client.option_input_valid(self, Client.CHATROOM_MENU)
 
         if selection == 1:  # View Chatrooms
+            Message.send_static_msg(self, Message.TYPES["COMMAND"], "51", self.ssl_socket)
             pass
         if selection == 2:  # Join a chatroom
             Client.join_chatroom(self)
@@ -325,6 +337,7 @@ class Client:
                     if msg_text == "!QuiT!\n":
                         #Client.main_menu(self, Client.current_user)
                         Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom, self.ssl_socket)
+                        Client.partially_listening(self)
 
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
                     continue
@@ -332,26 +345,20 @@ class Client:
                 # 8. if the server socket is available to read, read from it and print the message
                 if self.ssl_socket in available_streams:
                     msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
-                    Message.print_message(self, msg_type, msg_text)
+                    Client.message_filter(self, msg_text, msg_type)
+
+                    ### Remove this statement when chatrooms working
+                    #Message.print_message(self, msg_type, msg_text)
 
             except Exception as e:
+                print(e)
                 Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
+
+
 
     def partially_listening(self):
 
-        """ Need to create a filter to act on different message types sent back by the server
-            this needs to only listen to the select statement, not stdin. if you start the
-            listening loop then you cannot exit from it, at the moment, possibly need an escape
-            sequence.
-
-            this filter should match a type then perform a specific output, and eventually restart
-            the listening loop.
-
-            need to redesign the database as the relationships are wrong at the moment,
-            need to add extra entitys for expansion, see paper notes.
-
-            also need to input test data into the database before upsize, this will allow proper
-            testing of the select, update and removal statments."""
+        """ """
 
         while True:
 
@@ -362,45 +369,36 @@ class Client:
             if self.ssl_socket in available_streams:
 
                 msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
+                Client.message_filter(self, msg_text, msg_type)
 
-                msg_type = str(msg_type)
 
-                if msg_type[0] == "0":  # NORMAL
-                    Client.ao_normal_msg(self, msg_text)
+    def message_filter(self, msg_text, msg_type):
 
-                    # Message.print_message(self, msg_type, msg_text)
-                    # print(msg_type, msg_text)
-                    break
+        """"""
 
-                elif msg_type[0] == "1":  # JOIN
-                    Client.ao_join_msg(self, msg_text)
-                    break
+        msg_type = str(msg_type)
 
-                elif msg_type[0] == "2":  # USER
-                    Client.ao_user_msg(self, msg_text)
+        if msg_type[0] == "0":  # NORMAL
+            Client.ao_normal_msg(self, msg_text)
 
-                    # Message.print_message(self, msg_type, msg_text)
-                    # print(msg_type, msg_text)
-                    break
+        elif msg_type[0] == "1":  # JOIN
+            Client.ao_join_msg(self, msg_text)
 
-                elif msg_type[0] == "3":  # PASS
-                    Client.ao_pass_msg(self, msg_text)
-                    break
+        elif msg_type[0] == "2":  # USER
+            Client.ao_user_msg(self, msg_text)
 
-                elif msg_type[0] == "4":  # DIRECT
-                    Client.ao_direct_msg(self, msg_text)
-                    break
+        elif msg_type[0] == "3":  # PASS
+            Client.ao_pass_msg(self, msg_text)
 
-                elif msg_type[0] == "5":  # COMMAND
-                    Client.ao_command_msg(self, msg_text)
-                    break
+        elif msg_type[0] == "4":  # DIRECT
+            Client.ao_direct_msg(self, msg_text)
 
-                elif msg_type[0] == "6":  # SERVER
-                    Client.ao_server_msg(self, msg_text, msg_type)
+        elif msg_type[0] == "5":  # COMMAND
+            Client.ao_command_msg(self, msg_text)
 
-                    # Message.print_message(self, msg_type, msg_text)
-                    # Client.partially_listening(self)
-                    break
+        elif msg_type[0] == "6":  # SERVER
+            Client.ao_server_msg(self, msg_text, msg_type)
+
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -434,6 +432,11 @@ class Client:
     def ao_normal_msg(self, msg_text):
 
         """Function called "ActionsOn_normal_msg" """
+
+        timestamp = datetime.now()
+
+        print("({0}:{1}:{2})".format(timestamp.hour, timestamp.minute, timestamp.second), msg_text)
+
 
         return
 
@@ -473,14 +476,14 @@ class Client:
 
         msg_type = str(msg_type)
 
-        print(Message.print_message(msg, 6, msg_text))
+        #print(Message.print_message(msg, 6, msg_text))
 
         if msg_type[0] == "6" and msg_type[1] == "1": # "Login Successful."
             print("login ok")
             Client.main_menu(self, Client.current_user)
 
         elif msg_type[0] == "6" and msg_type[1] == "2": # "Login Unsuccessful.":
-            print("no login")
+            print("Authentication Failure, Login Unsuccessful.")
             Client.initial_options(self)
 
         elif msg_type[0] == "6" and msg_type[1] == "3": # "Username already in use.":
@@ -496,17 +499,29 @@ class Client:
             Client.chatroom_menu(self)
 
         elif msg_type[0] == "6" and msg_type[1] == "6": # "Joined the Chatroom.":
-            print("Sucessfully joined chatroom.")
+            print("Sucessfully joined Chatroom.")
             Client.listening(self)
 
         elif msg_type[0] == "6" and msg_type[1] == "7": # "User already in Chatroom.":
-            print("User already in Chatroom.")
-            #Client.listening(self)
-
-        elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
-            print("User exited chatroom Chatroom.")
+            print("User already in Chatroom")
             Client.main_menu(self, Client.current_user)
 
+        elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
+            print("User exited Chatroom.")
+            Client.main_menu(self, Client.current_user)
+
+        elif msg_type[0] == "6" and msg_type[1] == "9": # "Available Chatrooms.":
+
+            print("\n")
+            print("ChatterBox", "\n", "\n")
+            print("Available Chatrooms.", "\n")
+
+            print("Room Names: \n")
+            rooms = msg_text.split("|")
+
+            for room in rooms:
+                print(room)
+            Client.chatroom_menu(self)
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
@@ -545,6 +560,8 @@ class Message:
 
     def print_message(self, msg_type, msg_text):
         """This function prints a message with the text length in a nice format."""
+
+        msg_type = int(str(msg_type)[0])
 
         print((next(iter({k for k, v in Message.TYPES.items() if v == msg_type}))), len(msg_text), msg_text)
 
