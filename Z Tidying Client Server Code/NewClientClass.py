@@ -1,3 +1,15 @@
+
+"""**********************************************************
+        Grant Draper SFC5 - Chat Server (Client)
+                Script Pre-Requisites
+
+            ****** Must be ran on Linux ******
+
+                Python 3.6 Interpreter
+                Modules: pypyodbc 1.3.4
+**********************************************************"""
+
+
 import socket
 import select
 import ssl
@@ -214,6 +226,7 @@ class Client:
         selection = Client.option_input_valid(self, Client.CHATROOM_MENU)
 
         if selection == 1:  # View Chatrooms
+            Message.send_static_msg(self, Message.TYPES["COMMAND"], "51", self.ssl_socket)
             pass
         if selection == 2:  # Join a chatroom
             Client.join_chatroom(self)
@@ -463,15 +476,14 @@ class Client:
 
         msg_type = str(msg_type)
 
-        print(Message.print_message(msg, 6, msg_text))
-        print(msg_type, type(msg_type))
+        #print(Message.print_message(msg, 6, msg_text))
 
         if msg_type[0] == "6" and msg_type[1] == "1": # "Login Successful."
             print("login ok")
             Client.main_menu(self, Client.current_user)
 
         elif msg_type[0] == "6" and msg_type[1] == "2": # "Login Unsuccessful.":
-            print("no login")
+            print("Authentication Failure, Login Unsuccessful.")
             Client.initial_options(self)
 
         elif msg_type[0] == "6" and msg_type[1] == "3": # "Username already in use.":
@@ -491,12 +503,25 @@ class Client:
             Client.listening(self)
 
         elif msg_type[0] == "6" and msg_type[1] == "7": # "User already in Chatroom.":
-            print("User already in Chatroom.")
+            print("User already in Chatroom")
             Client.main_menu(self, Client.current_user)
 
         elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
             print("User exited Chatroom.")
             Client.main_menu(self, Client.current_user)
+
+        elif msg_type[0] == "6" and msg_type[1] == "9": # "Available Chatrooms.":
+
+            print("\n")
+            print("ChatterBox", "\n", "\n")
+            print("Available Chatrooms.", "\n")
+
+            print("Room Names: \n")
+            rooms = msg_text.split("|")
+
+            for room in rooms:
+                print(room)
+            Client.chatroom_menu(self)
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
