@@ -7,7 +7,6 @@ import hashlib
 import getpass
 from datetime import datetime
 
-
 # Message format is:
 #   4 bytes unsigned type
 #   4 bytes unsigned length
@@ -52,7 +51,6 @@ class Client:
             self.ssl_socket.connect((HOST, PORT))
             Client.sockets.append(self.ssl_socket)
             Client.server_details += HOST, PORT
-
         except Exception as e:
             print(e)
             print("Completed with Exception1.", "\n")
@@ -291,12 +289,14 @@ class Client:
                 Client.partially_listening(self)
                 return
 
+
     def option_input_valid(self, list):
 
         while True:
             selection = Client.input_only_int(self)
             if (selection - 1) in range(0, len(list)):
                 return selection
+
 
     def input_only_int(self):
 
@@ -322,9 +322,8 @@ class Client:
                     msg_text = sys.stdin.readline()
 
                     if msg_text == "!QuiT!\n":
-                        # Client.main_menu(self, Client.current_user)
-                        Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom,
-                                                self.ssl_socket)
+                        #Client.main_menu(self, Client.current_user)
+                        Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom, self.ssl_socket)
                         Client.partially_listening(self)
 
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
@@ -336,11 +335,13 @@ class Client:
                     Client.message_filter(self, msg_text, msg_type)
 
                     ### Remove this statement when chatrooms working
-                    # Message.print_message(self, msg_type, msg_text)
+                    #Message.print_message(self, msg_type, msg_text)
 
             except Exception as e:
                 print(e)
                 Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
+
+
 
     def partially_listening(self):
 
@@ -353,8 +354,10 @@ class Client:
 
             # 8. if the server socket is available to read, read from it and print the message
             if self.ssl_socket in available_streams:
+
                 msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
                 Client.message_filter(self, msg_text, msg_type)
+
 
     def message_filter(self, msg_text, msg_type):
 
@@ -382,6 +385,7 @@ class Client:
 
         elif msg_type[0] == "6":  # SERVER
             Client.ao_server_msg(self, msg_text, msg_type)
+
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -418,7 +422,8 @@ class Client:
 
         timestamp = datetime.now()
 
-        print("{0}:{1}:{2} --".format(timestamp.hour, timestamp.minute, timestamp.second), msg_text)
+        print("({0}:{1}:{2})".format(timestamp.hour, timestamp.minute, timestamp.second), msg_text)
+
 
         return
 
@@ -461,38 +466,37 @@ class Client:
         print(Message.print_message(msg, 6, msg_text))
         print(msg_type, type(msg_type))
 
-        if msg_type[0] == "6" and msg_type[1] == "1":  # "Login Successful."
+        if msg_type[0] == "6" and msg_type[1] == "1": # "Login Successful."
             print("login ok")
             Client.main_menu(self, Client.current_user)
 
-        elif msg_type[0] == "6" and msg_type[1] == "2":  # "Login Unsuccessful.":
+        elif msg_type[0] == "6" and msg_type[1] == "2": # "Login Unsuccessful.":
             print("no login")
             Client.initial_options(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "3":  # "Username already in use.":
+        elif msg_type[0] == "6" and msg_type[1] == "3": # "Username already in use.":
             print("Username already in use, please try again.")
             Client.create_new_user(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "4":  # "Account successfully registered.":
+        elif msg_type[0] == "6" and msg_type[1] == "4": # "Account successfully registered.":
             print("Account Successfully registered.")
             Client.initial_options(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "5":  # "Chatroom does not exist.":
+        elif msg_type[0] == "6" and msg_type[1] == "5": # "Chatroom does not exist.":
             print("Chatroom does not exist.")
             Client.chatroom_menu(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "6":  # "Joined the Chatroom.":
+        elif msg_type[0] == "6" and msg_type[1] == "6": # "Joined the Chatroom.":
             print("Sucessfully joined Chatroom.")
             Client.listening(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "7":  # "User already in Chatroom.":
+        elif msg_type[0] == "6" and msg_type[1] == "7": # "User already in Chatroom.":
             print("User already in Chatroom.")
             Client.main_menu(self, Client.current_user)
 
-        elif msg_type[0] == "6" and msg_type[1] == "8":  # "User removed from Chatroom.":
+        elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
             print("User exited Chatroom.")
             Client.main_menu(self, Client.current_user)
-
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
@@ -543,7 +547,6 @@ class Message:
             msg_text.strip().encode("utf-8"))  # cut off a newline
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
-
 
 msg = Message()
 

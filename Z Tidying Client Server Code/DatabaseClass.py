@@ -3,6 +3,7 @@ import pprint
 
 
 class Database:
+
     """Class called "Database", this contains a list of functions that can be
         executed to manipulate of retrieve data from the database"""
 
@@ -21,10 +22,10 @@ class Database:
         " = '{0}' "  # 11
     ]
 
-    # connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
-    #                               "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
     connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
-                                  "Database=Test4;""uid=DatabaseAdmin;pwd=Password01")
+                                   "Database=PythonProject2DB;""uid=DatabaseAdmin;pwd=Password01")
+    #connection = pypyodbc.connect("Driver={SQL Server};""Server=WIN-4LSB61AA7VI\SQLEXPRESSPYTHON;"
+    #                              "Database=Test4;""uid=DatabaseAdmin;pwd=Password01")
     cursor = connection.cursor()
 
     def execute_sqlcode(self, sqlcode):
@@ -128,7 +129,9 @@ class Database:
              screenname of the user it is linked to. this can then be compared to the
              screenname provided by the user."""
 
-        sqlcode = "select ScreenName from Users inner join Passwords on Users.User_ID=Passwords.User_ID where Passwords.HashedPassword='{0}' and Passwords.CurrentPassword=1".format(pswd)
+        sqlcode = "select ScreenName from Users " \
+                  "inner join Passwords on Users.User_ID=Passwords.User_ID " \
+                  "where Passwords.HashedPassword='{0}' and Passwords.CurrentPassword=1".format(pswd)
 
         user = Database.fetch_data(self, sqlcode)
 
@@ -139,7 +142,10 @@ class Database:
 
         """"""
 
-        sqlcode = "insert into dbo.Users (FirstName, LastName, ScreenName) values ('{0}', '{1}', '{2}') insert into dbo.Passwords([HashedPassword], [CurrentPassword], [User_ID]) values ('{3}', 1, SCOPE_IDENTITY())".format(fname, lname, sname, pass_hash)
+        sqlcode = "insert into dbo.Users (FirstName, LastName, ScreenName) " \
+                  "values ('{0}', '{1}', '{2}') " \
+                  "insert into dbo.Passwords([HashedPassword], [CurrentPassword], [User_ID]) " \
+                  "values ('{3}', 1, SCOPE_IDENTITY())".format(fname, lname, sname, pass_hash)
         Database.execute_sqlcode(self, sqlcode)
 
         return
@@ -153,7 +159,8 @@ class Database:
         elif room_type == "Public":
             room_type = 2
 
-        sqlcode = "insert into dbo.ChatRooms (RoomName, Description, RoomType_ID) values ('{0}', '{1}', '{2}')".format(
+        sqlcode = "insert into dbo.ChatRooms (RoomName, Description, RoomType_ID) " \
+                  "values ('{0}', '{1}', '{2}')".format(
             room_name, description, room_type)
 
         Database.execute_sqlcode(self, sqlcode)
@@ -183,7 +190,8 @@ class Database:
             return False, "Chatroom does not exist."
 
         else:
-            sqlcode = "insert into dbo.ChatRooms_Users (Room_ID, User_ID) values ('{0}', '{1}')".format(room_id, user_id)
+            sqlcode = "insert into dbo.ChatRooms_Users (Room_ID, User_ID) " \
+                      "values ('{0}', '{1}')".format(room_id, user_id)
             Database.execute_sqlcode(self, sqlcode)
             return True, "User added to Chatroom."
     """
@@ -218,7 +226,8 @@ class Database:
         user_id = Database.retrieve_user_id_from_uname(self, uname)
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
 
-        sqlcode = "select Room_User_ID from Chatrooms_Users where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
+        sqlcode = "select Room_User_ID from Chatrooms_Users " \
+                  "where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
         chatroom_user_id = Database.fetch_data(self, sqlcode)[0][0]
 
         if bool(chatroom_user_id):
@@ -231,8 +240,24 @@ class Database:
             print("False")
             return False, "Unable to remove user, user not in Chatroom."
 
+    def write_to_logs_db(self, timestamp, uname, msg_type, msg_text, socket):
 
+        """"""
 
+        if uname == "Unknown Client":
+            user_id = 0
+        else:
+            user_id = Database.retrieve_user_id_from_uname(self, uname)
+
+        socket = str(socket)
+        socket = socket.replace("'", "")
+
+        sqlcode1 = "insert into logs (DateTime, User_ID, MessageType, Message, Socket) " \
+                   "values ('{0}', '{1}', '{2}', '{3}', '{4}')".format(
+                    timestamp, user_id, msg_type, msg_text, socket)
+
+        Database.execute_sqlcode(self, sqlcode1)
+        return
 
 """
 value = "value2"
@@ -244,7 +269,7 @@ print((next(iter({k for k, v in dict.items() if v == value}))))
 
 
 
-
+#d = Database()
 """
 d = Database()
 if d.is_user_in_chatroom("gd", "loosygoosy"):
@@ -273,4 +298,4 @@ else:
 # print(d.select_from_table("ScreenName", "Users"))
 
 #print(d.select_from_table_where("ScreenName", "Users", "User_ID", "98459"))
-# print(d.select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))
+#print(d.select_from_table_where(["FirstName, LastName, ScreenName"], "Users", "User_ID", "1"))

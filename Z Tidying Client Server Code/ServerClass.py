@@ -42,10 +42,26 @@ class Server:
         except Exception as e:
             print(e)
 
+    def write_to_logs(self, msg_type, msg_text, readable_socket):
+
+        """"""
+
+        if readable_socket in Server.user_socket_pairs.values():
+            uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+        else:
+            uname = "Unknown Client"
+
+        timestamp = str(datetime.now())
+        d.write_to_logs_db(timestamp, uname, msg_type, msg_text, readable_socket)
+
+
     def receive_and_broadcast_message(self, readable_socket, client_sockets):
         """ receive message from readable_socket and send it to all sockets in client_sockets """
 
         (msg_type, msg_text) = Message.receive_msg(msg, readable_socket)
+
+        ### Write to logs
+        Server.write_to_logs(self, msg_type, msg_text, readable_socket)
 
         Message.print_message(msg, msg_type, msg_text)
 
@@ -132,6 +148,7 @@ class Server:
                 else:
                     try:
                         Server.receive_and_broadcast_message(self, readable_socket, Server.client_sockets)
+
                     except Exception as e:
                         print(e)
                     continue
@@ -156,8 +173,7 @@ class Server:
                 if d.is_user_in_chatroom(key)[1] == d.is_user_in_chatroom(uname)[1]:
                     Message.send_msg(self, 0, "{0}: {1}".format(uname, msg_text), (next(iter(
                         {v for k, v in Server.user_socket_pairs.items() if k == key}))))
-            else:
-                print("originator")
+
 
 
 
