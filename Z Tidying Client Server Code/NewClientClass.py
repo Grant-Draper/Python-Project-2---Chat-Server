@@ -1,4 +1,3 @@
-
 """**********************************************************
         Grant Draper SFC5 - Chat Server (Client)
                 Script Pre-Requisites
@@ -9,7 +8,6 @@
                 Modules: pypyodbc 1.3.4
 **********************************************************"""
 
-
 import socket
 import select
 import ssl
@@ -18,6 +16,7 @@ import struct
 import hashlib
 import getpass
 from datetime import datetime
+
 
 # Message format is:
 #   4 bytes unsigned type
@@ -250,8 +249,10 @@ class Client:
         selection = Client.option_input_valid(self, Client.FRIENDS_MENU)
 
         if selection == 1:  # View
+            Message.send_static_msg(self, Message.TYPES["COMMAND"], "52", self.ssl_socket)
             pass
         if selection == 2:  # Message
+            Client.start_private_chat(self)
             pass
         if selection == 3:  # Add
             pass
@@ -302,6 +303,24 @@ class Client:
                 Client.partially_listening(self)
                 return
 
+    def start_private_chat(self):
+
+        print("\n")
+        print("ChatterBox", "\n", "\n")
+        print("Start Private Chat", "\n")
+
+        while True:
+            print("Please type the Screen Name of the friend you want to talk to:")
+            sname = input()
+            if len(sname) == 0:
+                print("Screen Name invalid")
+                pass
+
+            elif len(sname) <= 20 and sname.isalnum():
+                msg.send_static_msg(Message.TYPES["DIRECT"], sname, Client.sockets[-1])
+                Client.chatroom = "PRIVATE_ROOM"
+                Client.partially_listening(self)
+                return
 
     def option_input_valid(self, list):
 
@@ -309,7 +328,6 @@ class Client:
             selection = Client.input_only_int(self)
             if (selection - 1) in range(0, len(list)):
                 return selection
-
 
     def input_only_int(self):
 
@@ -335,8 +353,9 @@ class Client:
                     msg_text = sys.stdin.readline()
 
                     if msg_text == "!QuiT!\n":
-                        #Client.main_menu(self, Client.current_user)
-                        Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom, self.ssl_socket)
+                        # Client.main_menu(self, Client.current_user)
+                        Message.send_static_msg(self, Message.TYPES["COMMAND"], msg_text + " " + Client.chatroom,
+                                                self.ssl_socket)
                         Client.partially_listening(self)
 
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
@@ -348,13 +367,11 @@ class Client:
                     Client.message_filter(self, msg_text, msg_type)
 
                     ### Remove this statement when chatrooms working
-                    #Message.print_message(self, msg_type, msg_text)
+                    # Message.print_message(self, msg_type, msg_text)
 
             except Exception as e:
                 print(e)
                 Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
-
-
 
     def partially_listening(self):
 
@@ -367,10 +384,8 @@ class Client:
 
             # 8. if the server socket is available to read, read from it and print the message
             if self.ssl_socket in available_streams:
-
                 msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
                 Client.message_filter(self, msg_text, msg_type)
-
 
     def message_filter(self, msg_text, msg_type):
 
@@ -398,7 +413,6 @@ class Client:
 
         elif msg_type[0] == "6":  # SERVER
             Client.ao_server_msg(self, msg_text, msg_type)
-
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -436,7 +450,6 @@ class Client:
         timestamp = datetime.now()
 
         print("({0}:{1}:{2})".format(timestamp.hour, timestamp.minute, timestamp.second), msg_text)
-
 
         return
 
@@ -476,52 +489,70 @@ class Client:
 
         msg_type = str(msg_type)
 
-        #print(Message.print_message(msg, 6, msg_text))
+        # print(Message.print_message(msg, 6, msg_text))
 
-        if msg_type[0] == "6" and msg_type[1] == "1": # "Login Successful."
-            print("login ok")
-            Client.main_menu(self, Client.current_user)
+        if len(msg_type) == 2:
 
-        elif msg_type[0] == "6" and msg_type[1] == "2": # "Login Unsuccessful.":
-            print("Authentication Failure, Login Unsuccessful.")
-            Client.initial_options(self)
+            if msg_type[0] == "6" and msg_type[1] == "1":  # "Login Successful."
+                print("login ok")
+                Client.main_menu(self, Client.current_user)
 
-        elif msg_type[0] == "6" and msg_type[1] == "3": # "Username already in use.":
-            print("Username already in use, please try again.")
-            Client.create_new_user(self)
+            elif msg_type[0] == "6" and msg_type[1] == "2":  # "Login Unsuccessful.":
+                print("Authentication Failure, Login Unsuccessful.")
+                Client.initial_options(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "4": # "Account successfully registered.":
-            print("Account Successfully registered.")
-            Client.initial_options(self)
+            elif msg_type[0] == "6" and msg_type[1] == "3":  # "Username already in use.":
+                print("Username already in use, please try again.")
+                Client.create_new_user(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "5": # "Chatroom does not exist.":
-            print("Chatroom does not exist.")
-            Client.chatroom_menu(self)
+            elif msg_type[0] == "6" and msg_type[1] == "4":  # "Account successfully registered.":
+                print("Account Successfully registered.")
+                Client.initial_options(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "6": # "Joined the Chatroom.":
-            print("Sucessfully joined Chatroom.")
-            Client.listening(self)
+            elif msg_type[0] == "6" and msg_type[1] == "5":  # "Chatroom does not exist.":
+                print("Chatroom does not exist.")
+                Client.chatroom_menu(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "7": # "User already in Chatroom.":
-            print("User already in Chatroom")
-            Client.main_menu(self, Client.current_user)
+            elif msg_type[0] == "6" and msg_type[1] == "6":  # "Joined the Chatroom.":
+                print("Sucessfully joined Chatroom.")
+                Client.listening(self)
 
-        elif msg_type[0] == "6" and msg_type[1] == "8": # "User removed from Chatroom.":
-            print("User exited Chatroom.")
-            Client.main_menu(self, Client.current_user)
+            elif msg_type[0] == "6" and msg_type[1] == "7":  # "User already in Chatroom.":
+                print("User already in Chatroom")
+                Client.main_menu(self, Client.current_user)
 
-        elif msg_type[0] == "6" and msg_type[1] == "9": # "Available Chatrooms.":
+            elif msg_type[0] == "6" and msg_type[1] == "8":  # "User removed from Chatroom.":
+                print("User exited Chatroom.")
+                Client.main_menu(self, Client.current_user)
 
-            print("\n")
-            print("ChatterBox", "\n", "\n")
-            print("Available Chatrooms.", "\n")
+            elif msg_type[0] == "6" and msg_type[1] == "9":  # "Available Chatrooms.":
 
-            print("Room Names: \n")
-            rooms = msg_text.split("|")
+                print("\n")
+                print("ChatterBox", "\n", "\n")
+                print("Available Chatrooms.", "\n")
 
-            for room in rooms:
-                print(room)
-            Client.chatroom_menu(self)
+                print("Room Names: \n")
+                rooms = msg_text.split("|")
+
+                for room in rooms:
+                    print(room)
+                Client.chatroom_menu(self)
+
+        elif len(msg_type) == 3:
+
+            if msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "0":  # "Online Users."
+
+                print("\n")
+                print("ChatterBox", "\n", "\n")
+                print("Available Chatrooms.", "\n")
+
+                print("Room Names: \n")
+                rooms = msg_text.split("|")
+
+                for room in rooms:
+                    print(room)
+                Client.friends_menu(self)
+
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
@@ -572,6 +603,7 @@ class Message:
             msg_text.strip().encode("utf-8"))  # cut off a newline
 
         Client.raw_send(self, sock, len(full_msg), full_msg)
+
 
 msg = Message()
 

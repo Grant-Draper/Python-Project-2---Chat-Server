@@ -21,6 +21,7 @@ class Server:
     client_sockets = []
     user_logins = {}
     user_socket_pairs = {}
+    private_chatrooms = {}
 
     def __init__(self, HOST, PORT):
 
@@ -247,6 +248,8 @@ class Server:
 
         """Function called "ActionsOn_direct_msg" """
 
+
+
         return
 
     def ao_command_msg(self, msg_text, readable_socket, msg_type):
@@ -266,7 +269,14 @@ class Server:
             uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
             parts = msg_text.split()
 
-            if d.remove_user_from_chatroom(uname, parts[1]):
+            if parts[1] == "PRIVATE_ROOM":
+
+                Server.private_chatrooms[]
+                msg.send_msg(611, "{0} has left the private chat.".format(uname), readable_socket)
+
+
+            else:
+                d.remove_user_from_chatroom(uname, parts[1])
                 msg.send_msg(68, "User removed from Chatroom.", readable_socket)
 
 
@@ -284,10 +294,21 @@ class Server:
 
             msg.send_msg(69, str(room_string), readable_socket)
 
-        elif msg_type[0] == "5":  # and msg_type[1] == "1":
+        elif msg_text[0] == "5" and msg_text[1] == "2":
+            """This allows the user to view all online users."""
+
+            room_string = ""
+
+            for key in Server.user_socket_pairs.keys():
+                room_string += str(key) + "|"
+
+            msg.send_msg(610, str(room_string), readable_socket)
+
+        elif msg_type[0] == "5":
             """This allows a user to register with the server by starting the client
                 registration function on receipt of the registration message."""
             Server.client_registration(self, msg_text, readable_socket)
+
 
         return
 

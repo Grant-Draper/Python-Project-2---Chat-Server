@@ -34,48 +34,24 @@ class Board:
 
     def input_valid(self, move):
 
-        # self.move = move
-
         if type(move[0]) is int and move[0] - 1 in range(9):
-
-            # print(move, "step 1")
-
             if type(move[1]) is str and len(move[1]) == 1:
-
-                # print(move, "step 2")
-
                 return True, "input valid"
-
             else:
-
                 return False, "input invalid: more than one char entered as player"
-
         else:
-            # print(move)
-
             return False, "input invalid: grid square out of range"
 
     def play_valid(self, play):
 
-        # print(play, "step 3")
-
         if self.current_state[play[0]] is None:
-
-            # print(play, "step 4")
-
             return True, "play is valid"
-
         else:
-            # print(play, "step 5")
-
             return False, "move invalid, space occupied"
 
     def make_change(self, change):
 
         self.current_state[change[0]] = change[1]
-
-        # print(change, "step 6")
-
         return True
 
     def play(self, user_input):
@@ -93,11 +69,10 @@ class Board:
                 self.game_play += [user_input]
                 self.make_change(user_input)
                 return self.game_won()
-                return True, "user input and play valid, move recorded"
+                #return True, "user input and play valid, move recorded"
 
             else:
                 return False, "play invalid, please enter a valid move"
-
         else:
             return False, "input invalid, please enter values in range"
 
