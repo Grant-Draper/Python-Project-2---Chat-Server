@@ -271,8 +271,12 @@ class Server:
 
             if parts[1] == "PRIVATE_ROOM":
 
-                Server.private_chatrooms[]
-                msg.send_msg(611, "{0} has left the private chat.".format(uname), readable_socket)
+                Server.private_chatrooms[uname] = "VACATED ROOM"
+
+                partner = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+                sock = (next(iter({v for k, v in Server.user_socket_pairs.items() if k == partner})))
+
+                msg.send_msg(611, "{0} has left the private chat.".format(uname), sock)
 
 
             else:

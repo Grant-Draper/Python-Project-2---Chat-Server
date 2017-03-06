@@ -553,6 +553,13 @@ class Client:
                     print(room)
                 Client.friends_menu(self)
 
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "1":  # "User has left the chat."
+                print(msg_text, ": Type !QuiT! to leave the Chatroom.")
+
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "2":  # "User has left the chat."
+                print(msg_text, ": Type !QuiT! to leave the Chatroom.")
+
+
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
