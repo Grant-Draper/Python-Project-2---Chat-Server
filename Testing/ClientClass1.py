@@ -313,14 +313,14 @@ class Client:
         print("Start Private Chat", "\n")
 
         while True:
-            print("Please type the Screen Name of the friend you want to talk to:")
+            print("{0}, please type the Screen Name of the friend you want to talk to:".format(Client.current_user))
             sname = input()
             if len(sname) == 0:
                 print("Screen Name invalid")
                 pass
 
             elif len(sname) <= 20 and sname.isalnum():
-                msg.send_static_msg(Message.TYPES["DIRECT"], sname, Client.sockets[-1])
+                msg.send_static_msg(Message.TYPES["DIRECT"], "41|" + sname, Client.sockets[-1])
                 Client.chatroom = "PRIVATE_ROOM-{0}".format(Client.current_user)
                 Client.partially_listening(self)
                 return
@@ -337,6 +337,7 @@ class Client:
 
         if selection == 1:  # Accept
             msg.send_static_msg(Message.TYPES["DIRECT"], "45", Client.sockets[-1])
+            Client.listening(self)
             pass
         if selection == 2:  # Decline
             pass
@@ -533,7 +534,7 @@ class Client:
                 Client.chatroom_menu(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "6":  # "Joined the Chatroom.":
-                print("Sucessfully joined Chatroom.")
+                print("Sucessfully joined Chatroom, please type !QuiT! to exit.")
                 Client.listening(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "7":  # "User already in Chatroom.":
@@ -563,32 +564,29 @@ class Client:
 
                 print("\n")
                 print("ChatterBox", "\n", "\n")
-                print("Available Chatrooms.", "\n")
+                print("Online Users.", "\n")
 
-                print("Room Names: \n")
+                print("User Names: \n")
                 rooms = msg_text.split("|")
 
                 for room in rooms:
                     print(room)
                 Client.friends_menu(self)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[
-                2] == "1":  # "You have successfully started a private chat."
-                print(msg_text, ": Please wait for the other user to join.")
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "1":  # "You have successfully started a private chat."
+                print(msg_text, ": Please wait for the other user to join, or type !QuiT! to exit.")
                 Client.listening(self)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[
-                2] == "2":  # "You have successfully left the chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "2":  # "You have successfully left the chat."
                 print(msg_text, ": You have successfully left the chat.")
                 Client.main_menu(self, Client.current_user)
 
             elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "3":  # "User has left the chat."
                 print(msg_text, ": Type !QuiT! to leave the Chatroom.")
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[
-                2] == "4":  # "You have been invited to join a private chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "4":  # "You have been invited to join a private chat."
                 print(msg_text, ": You have been invited to join a private chat.")
-
+                Client.private_chat_invitation(self)
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0

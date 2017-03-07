@@ -321,7 +321,7 @@ class Database:
 
         if room_id:
             if Database.count_users_in_private_room(self, uname1) <= 1:
-                Database.add_user_to_chatroom(self, uname1, room_id)
+                Database.add_user_to_chatroom(self, uname1, room_name)
                 return True, "{0} has joined the room.".format(uname1)
             else:
                 return False, "Room Full"
@@ -332,7 +332,7 @@ class Database:
 
             if room_id:
                 if Database.count_users_in_private_room(self, uname2) <= 1:
-                    Database.add_user_to_chatroom(self, uname2, room_id)
+                    Database.add_user_to_chatroom(self, uname2, room_name)
                     return True, "{0} has joined the room.".format(uname2)
                 else:
                     return False, "Room Full"
@@ -357,11 +357,11 @@ class Database:
 
 
 
-
-d = Database()
-
-room_name = "PRIVATE_ROOM-grant"
-print(d.retrieve_room_id_from_room_name(room_name))
-print(d.join_private_chatroom("grant", "BD"))
-
+#
+# d = Database()
+#
+# room_name = "PRIVATE_ROOM-grant"
+# print(d.retrieve_room_id_from_room_name(room_name))
+# print(d.join_private_chatroom("grant", "BD"))
+#
 
