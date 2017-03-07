@@ -11,7 +11,7 @@ import ssl
 import select
 import struct
 from datetime import datetime
-from DatabaseClass import *
+from DatabaseClass1 import *
 
 
 class Server:
@@ -272,7 +272,7 @@ class Server:
 
         elif parts[0] == "45":
 
-            if d.is_user_in_chatroom()
+            #if d.is_user_in_chatroom()
 
 
             return
