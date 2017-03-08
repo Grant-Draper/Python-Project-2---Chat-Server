@@ -27,7 +27,7 @@ from datetime import datetime
 class Client:
     server_details = []
     sockets = []
-    current_user = None
+    current_user = "Not Logged In"
     chatroom = None
 
     INITIAL_OPTIONS = ["1:     Log In",
@@ -36,23 +36,27 @@ class Client:
     MAIN_MENU = ["1:    Chatrooms",
                  "2:    Friends",
                  "3:    Server Information \n",
-                 "4:    Log Out"]
+                 "4:    Return to Current Chatroom",
+                 "5:    Log Out"]
 
     CHATROOM_MENU = ["1:    View Available Chatrooms",
                      "2:    Join Chatroom",
                      "3:    Create Chatroom \n",
-                     "4:    Main Menu"]
+                     "4:    Return to Current Chatroom",
+                     "5:    Main Menu"]
 
     FRIENDS_MENU = ["1:     View Friends",
                     "2:     Message Friend",
                     "3:     Add Friend",
                     "4:     Remove Friend \n",
-                    "5:     Main Menu"]
+                    "5:     Return to Current Chatroom",
+                    "6:     Main Menu"]
 
     SERVER_INFO_MENU = ["1:      Uptime",
                         "2:      Total Number of Registered Users",
                         "3:      Total Number of Chatrooms \n",
-                        "4:      Main Menu"]
+                        "4:      Return to Current Chatroom",
+                        "5:      Main Menu"]
 
     PRIVATE_CHAT_OPTIONS = ["1:     Accept Invitation",
                             "2:     Decline Invitation"]
@@ -211,7 +215,10 @@ class Client:
         if selection == 3:  # Server Info
             Client.server_menu(self)
             pass
-        if selection == 4:  # Log Out
+        if selection == 4:  # Return to chat
+            Client.return_to_chat(self)
+            pass
+        if selection == 5:  # Log Out
             Client.initial_options(self)
             pass
 
@@ -235,7 +242,10 @@ class Client:
             pass
         if selection == 3:  # Create a chatroom
             pass
-        if selection == 4:  # Main menu
+        if selection == 4:  # Return to chat
+            Client.return_to_chat(self)
+            pass
+        if selection == 5:  # Main menu
             Client.main_menu(self, Client.current_user)
             pass
 
@@ -261,7 +271,10 @@ class Client:
             pass
         if selection == 4:  # Remove
             pass
-        if selection == 5:  # Main menu
+        if selection == 5:  # Return to chat
+            Client.return_to_chat(self)
+            pass
+        if selection == 6:  # Main menu
             Client.main_menu(self, Client.current_user)
             pass
 
@@ -283,9 +296,23 @@ class Client:
             pass
         if selection == 3:  # Chatrooms total
             pass
-        if selection == 4:  # Main menu
+        if selection == 4:  # Return to chat
+            Client.return_to_chat(self)
+            pass
+        if selection == 5:  # Main menu
             Client.main_menu(self, Client.current_user)
             pass
+
+    def return_to_chat(self):
+
+        """"""
+
+        if Client.chatroom == None:
+            print("{0}, you have not joined a Chatroom.".format(Client.current_user))
+            print("Type !QuiT! to exit.\n")
+            Client.listening(self)
+        else:
+            Client.listening(self)
 
     def join_chatroom(self):
 
@@ -340,6 +367,8 @@ class Client:
             Client.listening(self)
             pass
         if selection == 2:  # Decline
+            msg.send_static_msg(Message.TYPES["DIRECT"], "46", Client.sockets[-1])
+            Client.main_menu(self, Client.current_user)
             pass
 
     def option_input_valid(self, list):
@@ -587,6 +616,11 @@ class Client:
             elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "4":  # "You have been invited to join a private chat."
                 print(msg_text, ": You have been invited to join a private chat.")
                 Client.private_chat_invitation(self)
+
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "5":  # "Private chat invitation declined by recipient."
+                print(msg_text, ": Private chat invitation declined by recipient.")
+                Client.chatroom = None
+                Client.main_menu(self, Client.current_user)
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
