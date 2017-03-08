@@ -207,7 +207,6 @@ class Database:
             return True, "User added to Chatroom."
 
         else:
-            print("Chatroom does not exist.")
             return False, "Chatroom does not exist."
 
     def is_user_in_a_chatroom(self, uname):
@@ -215,8 +214,6 @@ class Database:
         user_id = Database.retrieve_user_id_from_uname(self, uname)
         sqlcode = "select Room_ID from Chatrooms_Users where User_id = '{0}'".format(user_id)
         room_id = Database.fetch_data(self, sqlcode)
-
-        print(room_id)
 
         if room_id:
             return True, room_id
@@ -228,14 +225,16 @@ class Database:
         user_id = Database.retrieve_user_id_from_uname(self, uname)
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
 
+        print("UICR, uid rid", user_id, room_id)
+
         sqlcode = "select Room_User_ID from Chatrooms_Users " \
                   "where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
-        room_id = Database.fetch_data(self, sqlcode)
+        room_user_id = Database.fetch_data(self, sqlcode)
 
-        print(room_id)
+        print(room_user_id)
 
-        if room_id:
-            return True, room_id
+        if room_user_id:
+            return True, room_user_id
         else:
             return False, "False"
 
@@ -245,21 +244,17 @@ class Database:
 
         user_id = Database.retrieve_user_id_from_uname(self, uname)
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
-        print(user_id, room_id)
+
         sqlcode = "select Room_User_ID from Chatrooms_Users " \
                   "where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
         chatroom_user_id = Database.fetch_data(self, sqlcode)
-        print(sqlcode)
-        print(chatroom_user_id)
 
         if chatroom_user_id:
             sqlcode = "delete from Chatrooms_Users where Room_User_ID = '{0}'".format(chatroom_user_id[0][0])
             Database.execute_sqlcode(self, sqlcode)
-            print("True")
             return True, "User removed from Chatroom."
 
         else:
-            print("False")
             return False, "Unable to remove user, user not in Chatroom."
 
     def write_to_logs_db(self, timestamp, uname, msg_type, msg_text, socket):
@@ -311,11 +306,10 @@ class Database:
         return
 
 
-    def count_users_in_private_room(self, uname):
+    def count_users_in_private_room(self, room_name):
 
         """"""
 
-        room_name = "PRIVATE_ROOM-{0}".format(uname)
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
         sqlcode = "select User_ID from Chatrooms_Users where Room_ID = '{0}'".format(room_id)
         count = Database.fetch_data(self, sqlcode)
@@ -328,37 +322,54 @@ class Database:
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
         sqlcode = "select User_ID from Chatrooms_Users where Room_ID = '{0}'".format(room_id)
         count = Database.fetch_data(self, sqlcode)
+        print(count)
         return len(count)
 
-
-    def join_private_chatroom(self, uname1, uname2):
+    def join_private_chatroom(self, uname, room_name):
 
         """"""
 
-        room_name = "PRIVATE_ROOM-{0}".format(uname1)
-        print("'{0}'".format(room_name))
-
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
-
+        print(1, room_id)
         if room_id:
-            if Database.count_users_in_private_room(self, uname1) <= 1:
-                Database.add_user_to_chatroom(self, uname1, room_name)
-                return True, "{0} has joined the room.".format(uname1)
+            if Database.count_users_in_private_room(self, room_name) <= 1:
+                Database.add_user_to_chatroom(self, uname, room_name)
+                return True, "{0} has joined the room.".format(uname)
             else:
                 return False, "Room Full"
+        else:
+            return False, "No Private Room Exists."
 
-        elif room_id is False:
-            room_name = "PRIVATE_ROOM-{0}".format(uname2)
-            room_id = Database.retrieve_room_id_from_room_name(self, room_name)
 
-            if room_id:
-                if Database.count_users_in_private_room(self, uname2) <= 1:
-                    Database.add_user_to_chatroom(self, uname2, room_name)
-                    return True, "{0} has joined the room.".format(uname2)
-                else:
-                    return False, "Room Full"
-            else:
-                return False, "No Private Room Exists."
+
+
+    # def join_private_chatroom(self, uname1, uname2):
+    #
+    #     """"""
+    #
+    #     room_name = "PRIVATE_ROOM-{0}".format(uname1)
+    #
+    #     room_id = Database.retrieve_room_id_from_room_name(self, room_name)
+    #
+    #     if room_id:
+    #         if Database.count_users_in_private_room(self, uname1) <= 1:
+    #             Database.add_user_to_chatroom(self, uname1, room_name)
+    #             return True, "{0} has joined the room.".format(uname1)
+    #         else:
+    #             return False, "Room Full"
+    #
+    #     elif room_id is False:
+    #         room_name = "PRIVATE_ROOM-{0}".format(uname2)
+    #         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
+    #
+    #         if room_id:
+    #             if Database.count_users_in_private_room(self, uname2) <= 1:
+    #                 Database.add_user_to_chatroom(self, uname2, room_name)
+    #                 return True, "{0} has joined the room.".format(uname2)
+    #             else:
+    #                 return False, "Room Full"
+    #         else:
+    #             return False, "No Private Room Exists."
 
     def delete_chatroom(self, room_name):
 

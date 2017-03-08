@@ -28,7 +28,7 @@ class Client:
     server_details = []
     sockets = []
     current_user = "Not Logged In"
-    chatroom = None
+    chatroom = "Not In Chatroom"
 
     INITIAL_OPTIONS = ["1:     Log In",
                        "2:     Create New Account"]
@@ -307,7 +307,7 @@ class Client:
 
         """"""
 
-        if Client.chatroom == None:
+        if Client.chatroom == "Not In Chatroom":
             print("{0}, you have not joined a Chatroom.".format(Client.current_user))
             print("Type !QuiT! to exit.\n")
             Client.listening(self)
@@ -347,8 +347,8 @@ class Client:
                 pass
 
             elif len(sname) <= 20 and sname.isalnum():
-                msg.send_static_msg(Message.TYPES["DIRECT"], "41|" + sname, Client.sockets[-1])
                 Client.chatroom = "PRIVATE_ROOM-{0}".format(Client.current_user)
+                msg.send_static_msg(Message.TYPES["DIRECT"], "41|" + Client.chatroom + "|" + sname, Client.sockets[-1])
                 Client.partially_listening(self)
                 return
 
@@ -363,11 +363,11 @@ class Client:
         selection = Client.option_input_valid(self, Client.SERVER_INFO_MENU)
 
         if selection == 1:  # Accept
-            msg.send_static_msg(Message.TYPES["DIRECT"], "45", Client.sockets[-1])
+            msg.send_static_msg(Message.TYPES["DIRECT"], "45|" + Client.chatroom, Client.sockets[-1])
             Client.listening(self)
             pass
         if selection == 2:  # Decline
-            msg.send_static_msg(Message.TYPES["DIRECT"], "46", Client.sockets[-1])
+            msg.send_static_msg(Message.TYPES["DIRECT"], "46|" + Client.chatroom, Client.sockets[-1])
             Client.main_menu(self, Client.current_user)
             pass
 
@@ -602,25 +602,32 @@ class Client:
                     print(room)
                 Client.friends_menu(self)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "1":  # "You have successfully started a private chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "1":  # Sender: "You have successfully started a private chat."
                 print(msg_text, ": Please wait for the other user to join, or type !QuiT! to exit.")
                 Client.listening(self)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "2":  # "You have successfully left the chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "2":  # Sender: "You have successfully left the chat."
                 print(msg_text, ": You have successfully left the chat.")
                 Client.main_menu(self, Client.current_user)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "3":  # "User has left the chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "3":  # Recipient: "User has left the chat."
                 print(msg_text, ": Type !QuiT! to leave the Chatroom.")
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "4":  # "You have been invited to join a private chat."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "4":  # Recipient: "You have been invited to join a private chat."
                 print(msg_text, ": You have been invited to join a private chat.")
+                parts = msg_text.split(',')
+                Client.chatroom = "PRIVATE_ROOM-{0}".format(parts[0])
+                print(Client.chatroom)
                 Client.private_chat_invitation(self)
 
-            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "5":  # "Private chat invitation declined by recipient."
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "5":  # Sender: "Private chat invitation declined by recipient."
                 print(msg_text, ": Private chat invitation declined by recipient.")
                 Client.chatroom = None
                 Client.main_menu(self, Client.current_user)
+
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "6":  # Recipient: "You have joined a private chat."
+                print(msg_text, ": You have joined a private chat, type !QuiT! to exit.")
+                Client.listening(self)
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0
