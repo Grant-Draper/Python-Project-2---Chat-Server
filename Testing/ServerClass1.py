@@ -248,7 +248,7 @@ class Server:
                 msg.send_msg(62, "Login Unsuccessful.", readable_socket)
         else:
             msg.send_msg(62, "Login Unsuccessful.", readable_socket)
-        return False, "Login Unsuccessful."
+            return False, "Login Unsuccessful."
 
     def ao_direct_msg(self, msg_text, readable_socket):
 

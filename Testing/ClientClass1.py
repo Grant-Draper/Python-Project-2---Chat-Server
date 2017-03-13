@@ -180,7 +180,7 @@ class Client:
                 print("Password invalid")
                 pass
 
-            elif len(pswd) > 7 and len(pswd) <= 50:
+            elif len(pswd) > 7 and len(pswd) <= 50 and pswd.isalnum():
                 pswd = hashlib.sha3_512(pswd.encode("utf-8")).hexdigest()
 
                 return True, str(pswd)
@@ -563,7 +563,7 @@ class Client:
                 Client.chatroom_menu(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "6":  # "Joined the Chatroom.":
-                print("Sucessfully joined Chatroom, please type !QuiT! to exit.")
+                print("Successfully joined Chatroom, please type !QuiT! to exit.")
                 Client.listening(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "7":  # "User already in Chatroom.":
