@@ -180,7 +180,7 @@ class Client:
                 print("Password invalid")
                 pass
 
-            elif len(pswd) > 7 and len(pswd) <= 50 and pswd.isalnum():
+            elif len(pswd) > 7 and len(pswd) <= 50:
                 pswd = hashlib.sha3_512(pswd.encode("utf-8")).hexdigest()
 
                 return True, str(pswd)
@@ -363,11 +363,11 @@ class Client:
         selection = Client.option_input_valid(self, Client.SERVER_INFO_MENU)
 
         if selection == 1:  # Accept
-            msg.send_static_msg(Message.TYPES["DIRECT"], "45|" + Client.chatroom, Client.sockets[-1])
+            msg.send_static_msg(Message.TYPES["DIRECT"], "42|" + Client.chatroom, Client.sockets[-1])
             Client.listening(self)
             pass
         if selection == 2:  # Decline
-            msg.send_static_msg(Message.TYPES["DIRECT"], "46|" + Client.chatroom, Client.sockets[-1])
+            msg.send_static_msg(Message.TYPES["DIRECT"], "43|" + Client.chatroom, Client.sockets[-1])
             Client.main_menu(self, Client.current_user)
             pass
 
@@ -563,7 +563,7 @@ class Client:
                 Client.chatroom_menu(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "6":  # "Joined the Chatroom.":
-                print("Successfully joined Chatroom, please type !QuiT! to exit.")
+                print("Sucessfully joined Chatroom, please type !QuiT! to exit.")
                 Client.listening(self)
 
             elif msg_type[0] == "6" and msg_type[1] == "7":  # "User already in Chatroom.":

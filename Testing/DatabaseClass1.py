@@ -209,9 +209,9 @@ class Database:
         else:
             return False, "Chatroom does not exist."
 
-    def is_user_in_a_chatroom(self, screenname):
+    def is_user_in_a_chatroom(self, uname):
 
-        user_id = Database.retrieve_user_id_from_uname(self, screenname)
+        user_id = Database.retrieve_user_id_from_uname(self, uname)
         sqlcode = "select Room_ID from Chatrooms_Users where User_id = '{0}'".format(user_id)
         room_id = Database.fetch_data(self, sqlcode)
 

@@ -222,8 +222,7 @@ class Server:
                 return True, "Username OK"
             else:
                 msg.send_msg(63, "Login Unsuccessful.", readable_socket)
-
-        return False, "Username not found"
+                return False, "Username not found"
 
     def ao_pass_msg(self, msg_text, readable_socket):
 
@@ -248,7 +247,7 @@ class Server:
                 msg.send_msg(62, "Login Unsuccessful.", readable_socket)
         else:
             msg.send_msg(62, "Login Unsuccessful.", readable_socket)
-            return False, "Login Unsuccessful."
+        return False, "Login Unsuccessful."
 
     def ao_direct_msg(self, msg_text, readable_socket):
 
@@ -271,6 +270,7 @@ class Server:
                 msg.send_msg(611, "{0}, has started a private chat.".format(sender_uname), readable_socket)
                 # Notifies the recipient
                 msg.send_msg(614, "{0}, has started a private chat.".format(sender_uname), recipient_socket)
+
             else:
                 print("about to join")
                 x = d.join_private_chatroom(sender_uname, parts[1])
@@ -278,25 +278,15 @@ class Server:
                 #Server.private_client_link[parts[2]] = readable_socket
                 msg.send_msg(611, "{0}, has started a private chat.".format(sender_uname), readable_socket)
                 msg.send_msg(614, "{0}, has started a private chat.".format(sender_uname), recipient_socket)
-            return
 
-        elif parts[0] == "42":
-            return
-
-        elif parts[0] == "43":
-            return
-
-        elif parts[0] == "44":
-            return
-
-        elif parts[0] == "45":  # Accept chat invitation
+        elif parts[0] == "42":  # Accept chat invitation
 
             #partner_uname = (next(iter({k for k, v in Server.private_client_link.items() if v == sock})))
             d.join_private_chatroom(sender_uname, parts[1])
             msg.send_msg(616, "You have joined {0}.".format(parts[1]), readable_socket)
             return
 
-        elif parts[0] == "46":
+        elif parts[0] == "43":
             partner_sock = (next(iter({v for k, v in Server.private_client_link.items() if k == partner_uname})))
             partner_uname = (next(iter({k for k, v in Server.private_client_link.items() if v == partner_sock})))
             del Server.user_logins[sender_uname]
