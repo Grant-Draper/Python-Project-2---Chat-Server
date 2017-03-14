@@ -368,6 +368,7 @@ class Client:
             pass
         if selection == 2:  # Decline
             msg.send_static_msg(Message.TYPES["DIRECT"], "43|" + Client.chatroom, Client.sockets[-1])
+            Client.chatroom = "Not In Chatroom"
             Client.main_menu(self, Client.current_user)
             pass
 
@@ -622,7 +623,7 @@ class Client:
 
             elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "5":  # Sender: "Private chat invitation declined by recipient."
                 print(msg_text, ": Private chat invitation declined by recipient.")
-                Client.chatroom = None
+                Client.chatroom = "Not In Chatroom"
                 Client.main_menu(self, Client.current_user)
 
             elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "6":  # Recipient: "You have joined a private chat."

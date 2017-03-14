@@ -225,13 +225,9 @@ class Database:
         user_id = Database.retrieve_user_id_from_uname(self, uname)
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
 
-        print("UICR, uid rid", user_id, room_id)
-
         sqlcode = "select Room_User_ID from Chatrooms_Users " \
                   "where User_id = '{0}' and Room_ID = '{1}'".format(user_id, room_id)
         room_user_id = Database.fetch_data(self, sqlcode)
-
-        print(room_user_id)
 
         if room_user_id:
             return True, room_user_id
@@ -322,7 +318,6 @@ class Database:
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
         sqlcode = "select User_ID from Chatrooms_Users where Room_ID = '{0}'".format(room_id)
         count = Database.fetch_data(self, sqlcode)
-        print(count)
         return len(count)
 
     def join_private_chatroom(self, uname, room_name):
@@ -330,7 +325,7 @@ class Database:
         """"""
 
         room_id = Database.retrieve_room_id_from_room_name(self, room_name)
-        print(1, room_id)
+
         if room_id:
             if Database.count_users_in_private_room(self, room_name) <= 1:
                 Database.add_user_to_chatroom(self, uname, room_name)
@@ -375,9 +370,7 @@ class Database:
 
         """"""
 
-        room_id = Database.retrieve_room_id_from_room_name(self, room_name)
-
-        sqlcode = "delete from Chatrooms where Room_ID = '{0}'".format(room_id)
+        sqlcode = "delete from Chatrooms where Room_ID = '{0}'".format(room_name)
 
         Database.execute_sqlcode(self, sqlcode)
 

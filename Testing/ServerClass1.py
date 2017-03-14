@@ -261,37 +261,32 @@ class Server:
         if parts[0] == "41":  # Chat initiation message
 
             recipient_socket = (next(iter({v for k, v in Server.user_socket_pairs.items() if k == parts[2].lower()})))
-            d.create_private_chat(sender_uname)
 
             if d.user_in_chatroom(sender_uname, parts[1])[0]:
-                #Server.private_client_link[parts[2]] = readable_socket
-
                 # Confirms to initiator
                 msg.send_msg(611, "{0}, has started a private chat.".format(sender_uname), readable_socket)
                 # Notifies the recipient
                 msg.send_msg(614, "{0}, has started a private chat.".format(sender_uname), recipient_socket)
 
             else:
-                print("about to join")
-                x = d.join_private_chatroom(sender_uname, parts[1])
-                print("after join results", x)
-                #Server.private_client_link[parts[2]] = readable_socket
+                d.create_private_chat(sender_uname)
+                d.join_private_chatroom(sender_uname, parts[1])
                 msg.send_msg(611, "{0}, has started a private chat.".format(sender_uname), readable_socket)
                 msg.send_msg(614, "{0}, has started a private chat.".format(sender_uname), recipient_socket)
 
         elif parts[0] == "42":  # Accept chat invitation
 
-            #partner_uname = (next(iter({k for k, v in Server.private_client_link.items() if v == sock})))
             d.join_private_chatroom(sender_uname, parts[1])
             msg.send_msg(616, "You have joined {0}.".format(parts[1]), readable_socket)
             return
 
-        elif parts[0] == "43":
-            partner_sock = (next(iter({v for k, v in Server.private_client_link.items() if k == partner_uname})))
-            partner_uname = (next(iter({k for k, v in Server.private_client_link.items() if v == partner_sock})))
-            del Server.user_logins[sender_uname]
-            d.delete_chatroom(d.is_user_in_a_chatroom(partner_uname))
-            msg.send_msg(615, "{0} has started a private chat.".format(partner_uname), partner_sock)
+        elif parts[0] == "43":  # Decline chat invitation
+
+            partner_uname = parts[1].split("-")[1]
+            partner_sock = (next(iter({v for k, v in Server.user_socket_pairs.items() if k == partner_uname})))
+
+            d.delete_chatroom(d.is_user_in_a_chatroom(partner_uname)[1][0][0])
+            msg.send_msg(615, "{0} has declined a private chat.".format(partner_uname), partner_sock)
             return
 
         return
@@ -319,7 +314,6 @@ class Server:
                     d.remove_user_from_chatroom()
 
                     msg.send_msg(611, "{0} has left the private chat.".format(uname), readable_socket)
-
 
             else:
                 d.remove_user_from_chatroom(uname, parts[1])
@@ -354,8 +348,6 @@ class Server:
             """This allows a user to register with the server by starting the client
                 registration function on receipt of the registration message."""
             Server.client_registration(self, msg_text, readable_socket)
-
-
         return
 
     def ao_server_msg(self, msg_text, readable_socket):
