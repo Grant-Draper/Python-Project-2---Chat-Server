@@ -9,7 +9,10 @@
 
 from ServerClass1 import *
 
-a = Server("192.168.1.201", 30000)
+a = Server("192.168.1.201", 30001)
+
+#a = Server("192.168.1.201", 30001)
+
 
 a.listening()
 

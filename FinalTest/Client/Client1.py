@@ -12,7 +12,7 @@
 from ClientClass1 import *
 #from NewClientClass import *
 
-c1 = Client("192.168.1.201", 30000)
+c1 = Client("192.168.1.201", 30000, "192.168.1.201", 30001)
 
 c1.initial_options()
 

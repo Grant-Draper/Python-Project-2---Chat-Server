@@ -26,6 +26,7 @@ from datetime import datetime
 
 class Client:
     server_details = []
+    server_details_alt = []
     sockets = []
     current_user = "Not Logged In"
     chatroom = "Not In Chatroom"
@@ -61,14 +62,23 @@ class Client:
     PRIVATE_CHAT_OPTIONS = ["1:     Accept Invitation",
                             "2:     Decline Invitation"]
 
-    def __init__(self, HOST, PORT):
+    def __init__(self, HOST1, PORT1, HOST2, PORT2):
 
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.ssl_socket = ssl.wrap_socket(server_socket, ca_certs="server.crt", cert_reqs=ssl.CERT_REQUIRED)
-            self.ssl_socket.connect((HOST, PORT))
+            try:
+                self.ssl_socket.connect((HOST1, PORT1))
+                print("Client started:", HOST1, PORT1)
+            except Exception as e:
+
+                self.ssl_socket.connect((HOST2, PORT2))
+                print("Client started:", HOST2, PORT2)
+
             Client.sockets.append(self.ssl_socket)
-            Client.server_details += HOST, PORT
+            Client.server_details += HOST1, PORT1
+            Client.server_details_alt += HOST2, PORT2
+
         except Exception as e:
             print(e)
             print("Completed with Exception1.", "\n")
@@ -408,6 +418,10 @@ class Client:
                                                 self.ssl_socket)
                         Client.partially_listening(self)
 
+                    if msg_text[0] == "/":
+                        Message.send_static_msg(self, Message.TYPES["COMMAND"], (msg_text.replace("\n", "")) + " " + Client.chatroom,
+                                                self.ssl_socket)
+
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
                     continue
 
@@ -416,12 +430,12 @@ class Client:
                     msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
                     Client.message_filter(self, msg_text, msg_type)
 
-                    ### Remove this statement when chatrooms working
-                    # Message.print_message(self, msg_type, msg_text)
-
             except Exception as e:
                 print(e)
-                Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
+                if Client.server_details:
+                    Client.__init__(self, Client.server_details_alt[-2], Client.server_details_alt[-1])
+                else:
+                    Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
 
     def partially_listening(self):
 
@@ -629,6 +643,11 @@ class Client:
             elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "6":  # Recipient: "You have joined a private chat."
                 print(msg_text, ": You have joined a private chat, type !QuiT! to exit.")
                 Client.listening(self)
+
+            elif msg_type[0] == "6" and msg_type[1] == "1" and msg_type[2] == "7":  # Recipient: "You have been removed from the Chatroom."
+                print(msg_text, ": You have been removed from the Chatroom, RESPECT THE RULES OR YOU WILL BE BANNED.")
+                Client.main_menu(self, Client.current_user)
+                Client.chatroom = "Not In Chatroom"
 
 class Message:
     TYPES = {"NORMAL": 0,  # 0

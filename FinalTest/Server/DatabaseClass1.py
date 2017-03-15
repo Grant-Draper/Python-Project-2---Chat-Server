@@ -376,11 +376,34 @@ class Database:
 
         return
 
+    def is_user_admin(self, uname):
+
+        """"""
+
+        sqlcode = "select User_ID from dbo.Users where ScreenName = '{0}' and AdminRights = '1'".format(uname)
+        check = Database.fetch_data(self, sqlcode)
+
+        if check:
+            return True
+        else:
+            return False
+
+    def how_many_users_in_room(self, uname):
+
+        """"""
+        room_id = Database.is_user_in_a_chatroom(self, uname)[1][0][0]
+        sqlcode = "select count(User_ID) from ChatRooms_Users where Room_ID = '{0}'".format(room_id)
+        check = Database.fetch_data(self, sqlcode)
+
+        if check:
+            return check[0][0]
+        else:
+            return False
 
 
 
-
-
+#d = Database()
+#print(d.how_many_users_in_room("bd"))
 
 #
 # d = Database()

@@ -25,7 +25,7 @@ class Server:
     private_client_link = {}
 
     def __init__(self, HOST, PORT):
-
+        print("Server started:", HOST, PORT)
         self.master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.master_socket.bind((HOST, PORT))
@@ -174,12 +174,16 @@ class Server:
 
         uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
 
-        for key in Server.user_socket_pairs.keys():
-            if key != uname:
+        count = (d.how_many_users_in_room(uname)) - 1
 
-                if d.is_user_in_a_chatroom(key)[1] == d.is_user_in_a_chatroom(uname)[1]:
-                    Message.send_msg(self, 0, "{0}: {1}".format(uname, msg_text), (next(iter(
-                        {v for k, v in Server.user_socket_pairs.items() if k == key}))))
+        while count != 0:
+            for key in Server.user_socket_pairs.keys():
+                if key != uname:
+
+                    if d.is_user_in_a_chatroom(key)[1] == d.is_user_in_a_chatroom(uname)[1]:
+                        Message.send_msg(self, 0, "{0}: {1}".format(uname, msg_text), (next(iter(
+                            {v for k, v in Server.user_socket_pairs.items() if k == key}))))
+                        count -= 1
 
 
     def ao_join_msg(self, msg_text, readable_socket):
@@ -306,7 +310,7 @@ class Server:
                 and removes the user from the chatroom, and notifies the user."""
 
             uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
-            parts = msg_text.split()
+            parts = msg_text.split()  # !QuiT!, chatroom
 
             if parts[1] == "PRIVATE_ROOM":
                 check = d.is_user_in_a_chatroom(uname)
@@ -318,6 +322,30 @@ class Server:
             else:
                 d.remove_user_from_chatroom(uname, parts[1])
                 msg.send_msg(68, "User removed from Chatroom.", readable_socket)
+
+        if msg_text[0] == "/":
+
+            """"""
+
+            parts = msg_text.split()  # /(command), screenname, chatroom
+            uname = (next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
+            target_socket = (next(iter({v for k, v in Server.user_socket_pairs.items() if k == parts[1].lower()})))
+
+            if parts[0] == "/ChatKick":
+
+                if d.is_user_admin(uname):
+                    if d.remove_user_from_chatroom(parts[1], parts[2])[0]:
+                        msg.send_msg(617, "User removed from Chatroom by Administrator.", target_socket)
+                        #msg.send_msg(0, "User kicked successfully.", readable_socket)
+                        Server.ao_normal_msg(self, ("{0} removed from Chatroom by Administrator.".format(parts[1])), readable_socket)
+                        return
+                else:
+                    msg.send_msg(0, "Unable to remove user, you do not have admin rights.", readable_socket)
+                    return
+
+
+
+
 
 
         elif msg_text[0] == "5" and msg_text[1] == "1":
@@ -449,6 +477,6 @@ msg = Message()
 
 
 
-a = Server("192.168.1.201", 30000)
+#a = Server("192.168.1.201", 30000)
 
-a.listening()
+#a.listening()
