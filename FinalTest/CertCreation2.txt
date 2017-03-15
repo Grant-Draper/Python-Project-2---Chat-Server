@@ -1,0 +1,21 @@
+
+
+#creates a rsa priv key
+openssl genrsa -des3 -out server.key 2048  
+openssl rsa -in server.key -out server.key
+
+#creates a rsa priv key
+openssl genrsa -des3 -out client.key 2048  
+openssl rsa -in client.key -out client.key
+
+#creates a new cert request to be actioned by a root ca
+openssl req -sha256 -new -key server.key -out server.csr -subj '/CN=localhost'
+
+#root ca then signs the cert with its private key creating server.crt
+openssl x509 -req -sha256 -days 365 -in server.csr -signkey server.key -out server.crt
+
+#creates a new client cert request to be actioned by a root ca
+openssl req -sha256 -new -key client.key -out client.csr -subj '/CN=localhost'
+
+#root ca then signs the client cert with its private key creating client.crt
+openssl x509 -req -sha256 -days 365 -in client.csr -signkey server.key -out client.crt
