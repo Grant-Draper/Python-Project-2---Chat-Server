@@ -117,6 +117,8 @@ class Client:
     def create_new_user(self):
 
         user = Client.gather_user_details(self)
+        print(user)
+
         msg.send_static_msg(Message.TYPES["COMMAND"], user, Client.sockets[-1])
         Client.partially_listening(self)
 
@@ -409,10 +411,13 @@ class Client:
                     Message.send_msg(self, Message.TYPES["NORMAL"], msg_text, self.ssl_socket)
                     continue
 
-                # 8. if the server socket is available to read, read from it and pass to the filter
+                # 8. if the server socket is available to read, read from it and print the message
                 if self.ssl_socket in available_streams:
                     msg_type, msg_text = Message.receive_msg_from(self, self.ssl_socket)
                     Client.message_filter(self, msg_text, msg_type)
+
+                    ### Remove this statement when chatrooms working
+                    # Message.print_message(self, msg_type, msg_text)
 
             except Exception as e:
                 print(e)
@@ -568,7 +573,6 @@ class Client:
 
             elif msg_type[0] == "6" and msg_type[1] == "8":  # "User removed from Chatroom.":
                 print("User exited Chatroom.")
-                Client.chatroom = "Not In Chatroom"
                 Client.main_menu(self, Client.current_user)
 
             elif msg_type[0] == "6" and msg_type[1] == "9":  # "Available Chatrooms.":

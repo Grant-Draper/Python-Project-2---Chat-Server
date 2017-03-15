@@ -77,6 +77,7 @@ class Server:
         if msg_type == 0:  # NORMAL
             Server.ao_normal_msg(self, msg_text, readable_socket)
 
+
         if msg_type == 1:  # JOIN
             Server.ao_join_msg(self, msg_text, readable_socket)
             pass
@@ -99,6 +100,10 @@ class Server:
 
         if msg_type == 6:  # SERVER
             Server.ao_server_msg(self, msg_text, readable_socket)
+            pass
+
+        if msg_type == 7:  # TEMP
+            Server.ao_temp_msg(self, msg_text, readable_socket)
             pass
 
     def raw_receive(self, sock, length):
@@ -294,7 +299,7 @@ class Server:
 
         msg_type = str(msg_type)
 
-        if msg_text[0] == "!":  # Escape sequence
+        if msg_text[0] == "!":
             """This acts on the escape sequence implemented in the client script. When
                 this message is received, it retrieves the username paired with the socket. It
                 then splits the message into its components (escape sequence, current chatroom),
@@ -315,7 +320,7 @@ class Server:
                 msg.send_msg(68, "User removed from Chatroom.", readable_socket)
 
 
-        elif msg_text[0] == "5" and msg_text[1] == "1":  # View all public rooms
+        elif msg_text[0] == "5" and msg_text[1] == "1":
             """This allows the user to view all chatrooms, it retrieves all public
                 chatrooms. This is then extracted and converted to a string with a delimiter
                 added, this is then sent to the client."""
@@ -329,7 +334,7 @@ class Server:
 
             msg.send_msg(69, str(room_string), readable_socket)
 
-        elif msg_text[0] == "5" and msg_text[1] == "2":  # View all online users
+        elif msg_text[0] == "5" and msg_text[1] == "2":
             """This allows the user to view all online users."""
 
             room_string = ""
@@ -339,7 +344,7 @@ class Server:
 
             msg.send_msg(610, str(room_string), readable_socket)
 
-        elif msg_type[0] == "5":  # Register with server
+        elif msg_type[0] == "5":
             """This allows a user to register with the server by starting the client
                 registration function on receipt of the registration message."""
             Server.client_registration(self, msg_text, readable_socket)
@@ -350,6 +355,12 @@ class Server:
         """Function called "ActionsOn_server_msg"
 
             This could be used for cross-server communication, site transfers etc."""
+
+        return
+
+    def ao_temp_msg(self, msg_text, readable_socket):
+
+        """Function called "ActionsOn_temp_msg" """
 
         return
 
@@ -438,20 +449,6 @@ msg = Message()
 
 
 
-#a = Server("192.168.1.201", 30000)
+a = Server("192.168.1.201", 30000)
 
-#a.listening()
-
-msg_type = 2
-
-filter_dict = {0 : Server.ao_normal_msg,
-               1 : Server.ao_join_msg,
-               2 : Server.ao_user_msg,
-               3 : Server.ao_pass_msg,
-               4 : Server.ao_direct_msg,
-               5 : Server.ao_command_msg,
-               6 : Server.ao_server_msg}
-
-#next(iter({k for k, v in Server.user_socket_pairs.items() if v == readable_socket})))
-
-#print(filter_dict[msg_type])
+a.listening()
