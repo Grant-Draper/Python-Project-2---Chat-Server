@@ -625,34 +625,34 @@ class Client:
                     print(room)
                 Client.friends_menu(self)
 
-            elif msg_type[0] == "611":                                  # Sender: "You have successfully started a private chat."
+            elif msg_type == "611":                                  # Sender: "You have successfully started a private chat."
                 print(msg_text, ": Please wait for the other user to join, or type !QuiT! to exit.")
                 Client.listening(self)
 
-            elif msg_type[0] == "612":                                   # Sender: "You have successfully left the chat."
+            elif msg_type == "612":                                   # Sender: "You have successfully left the chat."
                 print(msg_text, ": You have successfully left the chat.")
                 Client.main_menu(self, Client.current_user)
 
-            elif msg_type[0] == "613":                                    # Recipient: "User has left the chat."
+            elif msg_type == "613":                                    # Recipient: "User has left the chat."
                 print(msg_text, ": Type !QuiT! to leave the Chatroom.")
 
-            elif msg_type[0] == "614":                                    # Recipient: "You have been invited to join a private chat."
+            elif msg_type == "614":                                    # Recipient: "You have been invited to join a private chat."
                 print(msg_text, ": You have been invited to join a private chat.")
                 parts = msg_text.split(',')
                 Client.chatroom = "PRIVATE_ROOM-{0}".format(parts[0])
                 print(Client.chatroom)
                 Client.private_chat_invitation(self)
 
-            elif msg_type[0] == "615":                                   # Sender: "Private chat invitation declined by recipient."
+            elif msg_type == "615":                                   # Sender: "Private chat invitation declined by recipient."
                 print(msg_text, ": Private chat invitation declined by recipient.")
                 Client.chatroom = "Not In Chatroom"
                 Client.main_menu(self, Client.current_user)
 
-            elif msg_type[0] == "616":                                       # Recipient: "You have joined a private chat."
+            elif msg_type == "616":                                       # Recipient: "You have joined a private chat."
                 print(msg_text, ": You have joined a private chat, type !QuiT! to exit.")
                 Client.listening(self)
 
-            elif msg_type[0] == "617":                                       # Recipient: "You have been removed from the Chatroom."
+            elif msg_type == "617":                                       # Recipient: "You have been removed from the Chatroom."
                 print(msg_text, ": You have been removed from the Chatroom, RESPECT THE RULES OR YOU WILL BE BANNED.")
                 Client.main_menu(self, Client.current_user)
                 Client.chatroom = "Not In Chatroom"
