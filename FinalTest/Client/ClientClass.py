@@ -413,7 +413,6 @@ class Client:
 
         """This function controls how the user can respond to a private chat invitation."""
 
-        print("\n\n")
         for option in Client.PRIVATE_CHAT_OPTIONS:
             print(option)
         print("\n")
