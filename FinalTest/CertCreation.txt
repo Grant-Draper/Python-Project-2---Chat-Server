@@ -1,0 +1,13 @@
+The code I used for generating the ssl certificate is the following lines
+
+##### creates a rsa priv key
+openssl genrsa -des3 -out server.key 2048  
+openssl rsa -in server.key -out server.key
+
+##### creates a new cert request to be actioned by a root ca
+openssl req -sha256 -new -key server.key -out server.csr -subj '/CN=localhost'
+
+##### root ca then signs the cert with its private key creating server.crt
+openssl x509 -req -sha256 -days 365 -in server.csr -signkey server.key -out server.crt
+
+The password I used for the certificate is ChatServer

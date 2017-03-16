@@ -76,7 +76,7 @@ class Server:
 
         if msg_type == 0:  # NORMAL
             Server.ao_normal_msg(self, msg_text, readable_socket)
-
+            pass
 
         if msg_type == 1:  # JOIN
             Server.ao_join_msg(self, msg_text, readable_socket)
@@ -342,11 +342,6 @@ class Server:
                 else:
                     msg.send_msg(0, "Unable to remove user, you do not have admin rights.", readable_socket)
                     return
-
-
-
-
-
 
         elif msg_text[0] == "5" and msg_text[1] == "1":
             """This allows the user to view all chatrooms, it retrieves all public

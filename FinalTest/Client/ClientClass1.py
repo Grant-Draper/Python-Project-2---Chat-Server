@@ -27,6 +27,7 @@ from datetime import datetime
 class Client:
     server_details = []
     server_details_alt = []
+    current_server = 0  # 0 = Not connected, 1 = HOST+PORT1, 2 = HOST+PORT2
     sockets = []
     current_user = "Not Logged In"
     chatroom = "Not In Chatroom"
@@ -64,20 +65,25 @@ class Client:
 
     def __init__(self, HOST1, PORT1, HOST2, PORT2):
 
+        """Initialisation function to open a socket when the client is started,
+        this is then SSL encrypted and """
+
         try:
             server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.ssl_socket = ssl.wrap_socket(server_socket, ca_certs="server.crt", cert_reqs=ssl.CERT_REQUIRED)
             try:
                 self.ssl_socket.connect((HOST1, PORT1))
+                Client.current_server = 1
                 print("Client started:", HOST1, PORT1)
             except Exception as e:
 
                 self.ssl_socket.connect((HOST2, PORT2))
+                Client.current_server = 2
                 print("Client started:", HOST2, PORT2)
 
             Client.sockets.append(self.ssl_socket)
-            Client.server_details += HOST1, PORT1
-            Client.server_details_alt += HOST2, PORT2
+            Client.server_details = [HOST1, PORT1]
+            Client.server_details_alt = [HOST2, PORT2]
 
         except Exception as e:
             print(e)
@@ -432,10 +438,12 @@ class Client:
 
             except Exception as e:
                 print(e)
-                if Client.server_details:
-                    Client.__init__(self, Client.server_details_alt[-2], Client.server_details_alt[-1])
+                if Client.current_server == 1:
+                    Client.__init__(self, Client.server_details_alt[-2], Client.server_details_alt[-1], Client.server_details[-2], Client.server_details[-1])
+                    Client.main_menu(self, Client.current_user)
                 else:
-                    Client.__init__(self, Client.server_details[-2], Client.server_details[-1])
+                    Client.__init__(self, Client.server_details[-2], Client.server_details[-1], Client.server_details_alt[-2], Client.server_details_alt[-1])
+                    Client.main_menu(self, Client.current_user)
 
     def partially_listening(self):
 
@@ -460,23 +468,9 @@ class Client:
         if msg_type[0] == "0":  # NORMAL
             Client.ao_normal_msg(self, msg_text)
 
-        elif msg_type[0] == "1":  # JOIN
-            Client.ao_join_msg(self, msg_text)
-
-        elif msg_type[0] == "2":  # USER
-            Client.ao_user_msg(self, msg_text)
-
-        elif msg_type[0] == "3":  # PASS
-            Client.ao_pass_msg(self, msg_text)
-
-        elif msg_type[0] == "4":  # DIRECT
-            Client.ao_direct_msg(self, msg_text)
-
-        elif msg_type[0] == "5":  # COMMAND
-            Client.ao_command_msg(self, msg_text)
-
         elif msg_type[0] == "6":  # SERVER
             Client.ao_server_msg(self, msg_text, msg_type)
+
 
     def raw_receive(self, sock, length):
         """This function receives length bytes of raw data from a socket, returning the data."""
@@ -514,36 +508,6 @@ class Client:
         timestamp = datetime.now()
 
         print("({0}:{1}:{2})".format(timestamp.hour, timestamp.minute, timestamp.second), msg_text)
-
-        return
-
-    def ao_join_msg(self, msg_text):
-
-        """Function called "ActionsOn_join_msg" """
-
-        return
-
-    def ao_user_msg(self, msg_text):
-
-        """Function called "ActionsOn_user_msg" """
-
-        return
-
-    def ao_pass_msg(self, msg_text):
-
-        """Function called "ActionsOn_pass_msg" """
-
-        return
-
-    def ao_direct_msg(self, msg_text):
-
-        """Function called "ActionsOn_direct_msg" """
-
-        return
-
-    def ao_command_msg(self, msg_text):
-
-        """Function called "ActionsOn_command_msg" """
 
         return
 
@@ -663,7 +627,9 @@ class Message:
         pass
 
     def send_msg(self, msg_type, msg_text, sock):
-        """This function sends a message to a socket."""
+        """This function is used to send messages when the input is Stdin.
+            Stdin will put an invisible "new line" character at the end of
+             the inputted string, this function accounts for that."""
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text) - 1) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
@@ -692,7 +658,7 @@ class Message:
         print((next(iter({k for k, v in Message.TYPES.items() if v == msg_type}))), len(msg_text), msg_text)
 
     def send_static_msg(self, msg_type, msg_text, sock):
-        """."""
+        """This is used to send messages when the input is the input() function"""
 
         full_msg = struct.pack('!LL', msg_type, len(msg_text)) + bytes(
             msg_text.strip().encode("utf-8"))  # cut off a newline
