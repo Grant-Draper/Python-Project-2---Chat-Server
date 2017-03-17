@@ -152,6 +152,25 @@ class Client:
         msg.send_static_msg(Message.TYPES["COMMAND"], user, Client.sockets[-1])
         Client.partially_listening(self)
 
+    def create_new_public_chatroom(self):
+
+        """This function allows the User to create a new chatroom."""
+
+        while True:
+            print("Please type the chatroom name:")
+            chatroom = input()
+            print("Please type the chatroom description:")
+            description = input()
+            if len(chatroom) == 0:
+                print("Chatroom name invalid")
+                pass
+
+            elif len(chatroom) <= 20 and chatroom.isalnum():
+                msg.send_static_msg(Message.TYPES["COMMAND"], "53|" + chatroom + "|" + description, Client.sockets[-1])
+                Client.partially_listening(self)
+
+
+
     def user_log_in(self):
 
         """This function controls the user log in screen, collecting the username and
@@ -289,8 +308,7 @@ class Client:
             Client.join_chatroom(self)
             pass
         if selection == 3:  # Create a chatroom
-            print("Function not yet operational")
-            Client.chatroom_menu(self)
+            Client.create_new_public_chatroom(self)
             pass
         if selection == 4:  # Return to chat
             Client.return_to_chat(self)
@@ -349,16 +367,13 @@ class Client:
         selection = Client.option_input_valid(self, Client.SERVER_INFO_MENU)
 
         if selection == 1:  # Uptime
-            print("Function not yet operational")
-            Client.server_menu(self)
+            Client.get_server_uptime(self)
             pass
         if selection == 2:  # Users total
-            print("Function not yet operational")
-            Client.server_menu(self)
+            Client.get_total_users(self)
             pass
         if selection == 3:  # Chatrooms total
-            print("Function not yet operational")
-            Client.server_menu(self)
+            Client.get_total_chatrooms(self)
             pass
         if selection == 4:  # Return to chat
             Client.return_to_chat(self)
@@ -366,6 +381,28 @@ class Client:
         if selection == 5:  # Main menu
             Client.main_menu(self, Client.current_user)
             pass
+
+    def get_server_uptime(self):
+
+        """Function to retrieve the servers uptime."""
+
+        Message.send_static_msg(self, Message.TYPES["COMMAND"], "54", self.ssl_socket)
+        Client.partially_listening(self)
+
+    def get_total_users(self):
+
+        """Function to retrieve the servers uptime."""
+
+        Message.send_static_msg(self, Message.TYPES["COMMAND"], "55", self.ssl_socket)
+        Client.partially_listening(self)
+
+    def get_total_chatrooms(self):
+
+        """Function to retrieve the servers uptime."""
+
+        Message.send_static_msg(self, Message.TYPES["COMMAND"], "56", self.ssl_socket)
+        Client.partially_listening(self)
+
 
     def return_to_chat(self):
 
@@ -668,6 +705,29 @@ class Client:
                 Client.main_menu(self, Client.current_user)
                 Client.chatroom = "Not In Chatroom"
 
+            elif msg_type == "618":                                       # Recipient: "Chatroom already exists"
+                print(msg_text, ": Please try again.")
+                Client.chatroom_menu(self)
+
+            elif msg_type == "619":                                       # Recipient: "Chatroom created"
+                print(msg_text, ": New Public Chatroom.")
+                Client.chatroom_menu(self)
+
+            elif msg_type == "620":                                       # Recipient: "Current Server running time."
+                print("Current ChatterBox running time.")
+                start_time, running_time = msg_text.split("|")
+                print("Server was started: {0}".format(start_time))
+                print("Server has been running for: {0}".format(running_time))
+                Client.server_menu(self)
+
+            elif msg_type == "621":                                       # Recipient: "All Current Server Users."
+                print("Current Registered Users: {0}".format(msg_text))
+                Client.server_menu(self)
+
+            elif msg_type == "622":                                       # Recipient: "All Current Server Chatrooms."
+                print("Total Live Chatrooms: {0}".format(msg_text))
+                Client.server_menu(self)
+
 class Message:
     TYPES = {"NORMAL": 0,  # 0
              "JOIN": 1,  # 1
@@ -726,4 +786,3 @@ class Message:
 
 
 msg = Message()
-

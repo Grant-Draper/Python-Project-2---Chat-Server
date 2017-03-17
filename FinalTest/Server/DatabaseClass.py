@@ -324,6 +324,24 @@ class Database:
         count = Database.fetch_data(self, sqlcode)
         return len(count)
 
+    def count_all_users(self):
+
+        """This function allows you to count all registered users."""
+
+        sqlcode = "select User_ID from Users"
+        count = Database.fetch_data(self, sqlcode)
+        print(type(count))
+        return len(count)
+
+    def count_all_chatrooms(self):
+
+        """This function allows you to count all live chatrooms."""
+
+        sqlcode = "select Room_ID from Chatrooms"
+        count = Database.fetch_data(self, sqlcode)
+        return len(count)
+
+
     def join_private_chatroom(self, uname, room_name):
 
         """This function allows you to join a private chatroom, as long as the room is not full."""
@@ -371,3 +389,14 @@ class Database:
         else:
             return False
 
+    def does_chatroom_exist(self, room_name):
+
+        """This function allows you to check if a chatroom is already present in th database."""
+
+        sqlcode = "select Room_ID from ChatRooms where RoomName = '{0}'".format(room_name)
+        check = Database.fetch_data(self, sqlcode)
+
+        if check:
+            return True
+        else:
+            return False

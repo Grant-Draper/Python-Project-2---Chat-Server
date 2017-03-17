@@ -20,7 +20,7 @@ class Server:
     """Class called "Server", this contains a list of functions that can be
             executed to manage the Chat Server."""
 
-    uptime_timestamp = None
+    uptime_timestamp = datetime.now().replace(microsecond=0)
     client_sockets = []
     user_logins = {}
     user_socket_pairs = {}
@@ -35,7 +35,6 @@ class Server:
         self.master_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.master_socket.bind((HOST, PORT))
         self.master_socket.listen(1)
-        self.uptime_timestamp = datetime.now()
 
     def accept_new_client_connection(self):
 
@@ -353,6 +352,41 @@ class Server:
                 room_string += str(key) + "|"
 
             msg.send_msg(610, str(room_string), readable_socket)
+
+        elif msg_text[0] == "5" and msg_text[1] == "3":
+
+            """This allows the user to crete a new chatroom."""
+
+            parts = msg_text.split("|")  # command_id, room_name, description
+            check = d.does_chatroom_exist(parts[1])
+
+            if check:
+                msg.send_msg(618, "Chatroom already exists", readable_socket)
+            else:
+                d.create_new_chatroom(parts[1], parts[2], "Public")
+                msg.send_msg(619, "Chatroom created", readable_socket)
+
+        elif msg_text[0] == "5" and msg_text[1] == "4":
+
+            """This allows the user to view the current server running time."""
+
+            time_now = datetime.now().replace(microsecond=0)
+            running_time = time_now - Server.uptime_timestamp
+            msg.send_msg(620, str(Server.uptime_timestamp) + "|" + str(running_time), readable_socket)
+
+        elif msg_text[0] == "5" and msg_text[1] == "5":
+
+            """This allows the user to view how many users are registered with the server."""
+
+            count = d.count_all_users()
+            msg.send_msg(621, str(count), readable_socket)
+
+        elif msg_text[0] == "5" and msg_text[1] == "6":
+
+            """This allows the user to view how many live chatrooms exist."""
+
+            count = d.count_all_chatrooms()
+            msg.send_msg(622, str(count), readable_socket)
 
         elif msg_type[0] == "5":
             """This allows a user to register with the server by starting the client
