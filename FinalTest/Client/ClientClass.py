@@ -289,6 +289,8 @@ class Client:
             Client.join_chatroom(self)
             pass
         if selection == 3:  # Create a chatroom
+            print("Function not yet operational")
+            Client.chatroom_menu(self)
             pass
         if selection == 4:  # Return to chat
             Client.return_to_chat(self)
@@ -318,8 +320,12 @@ class Client:
             Client.start_private_chat(self)
             pass
         if selection == 3:  # Add
+            print("Function not yet operational")
+            Client.friends_menu(self)
             pass
         if selection == 4:  # Remove
+            print("Function not yet operational")
+            Client.friends_menu(self)
             pass
         if selection == 5:  # Return to chat
             Client.return_to_chat(self)
@@ -343,10 +349,16 @@ class Client:
         selection = Client.option_input_valid(self, Client.SERVER_INFO_MENU)
 
         if selection == 1:  # Uptime
+            print("Function not yet operational")
+            Client.server_menu(self)
             pass
         if selection == 2:  # Users total
+            print("Function not yet operational")
+            Client.server_menu(self)
             pass
         if selection == 3:  # Chatrooms total
+            print("Function not yet operational")
+            Client.server_menu(self)
             pass
         if selection == 4:  # Return to chat
             Client.return_to_chat(self)
